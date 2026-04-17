@@ -1,0 +1,37 @@
+import { NextResponse } from 'next/server';
+import dbConnect from '@/lib/mongodb';
+import Review from '@/models/Review';
+import { verifyToken } from '@/lib/jwt';
+import { cookies } from 'next/headers';
+
+export async function GET() {
+  await dbConnect();
+  const r = await Review.find({}).sort({ createdAt: -1 });
+  return NextResponse.json(r);
+}
+
+export async function POST(req) {
+  try {
+    const t = cookies().get('auth_token')?.value;
+    const ut = await verifyToken(t);
+    if (!ut || ut.role !== 'admin') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    
+    await dbConnect();
+    const data = await req.json();
+    const r = await Review.create(data);
+    return NextResponse.json(r);
+  } catch (err) { return NextResponse.json({ error: 'Error' }, { status: 500 }); }
+}
+
+export async function DELETE(req) {
+  try {
+    const t = cookies().get('auth_token')?.value;
+    const ut = await verifyToken(t);
+    if (!ut || ut.role !== 'admin') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    
+    await dbConnect();
+    const { id } = await req.json();
+    await Review.findByIdAndDelete(id);
+    return NextResponse.json({ success: true });
+  } catch (err) { return NextResponse.json({ error: 'Error' }, { status: 500 }); }
+}
