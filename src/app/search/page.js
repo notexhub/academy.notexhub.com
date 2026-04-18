@@ -5,7 +5,9 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import CourseCard from '@/components/courses/CourseCard';
 
-export default function SearchResults() {
+import { Suspense } from 'react';
+
+function SearchContent() {
   const searchParams = useSearchParams();
   const qCode = searchParams.get('q');
   const [courses, setCourses] = useState([]);
@@ -16,15 +18,16 @@ export default function SearchResults() {
       fetch(`/api/courses/search?q=${qCode}`)
         .then(r => r.json())
         .then(d => { setCourses(d); setLoading(false); });
+    } else {
+      setLoading(false);
     }
   }, [qCode]);
 
   return (
-    <main style={{ backgroundColor: '#f9fafb', minHeight: '100vh' }}>
-      <Navbar />
+    <>
       <section style={{ backgroundColor: 'var(--navy)', color: 'white', padding: '60px 0' }}>
         <div className="container">
-          <h1>&quot;{qCode}&quot; এর ফলাফল</h1>
+          <h1>&quot;{qCode || ''}&quot; এর ফলাফল</h1>
           <p style={{ marginTop: '0.5rem', color: '#cbd5e0' }}>আমরা {courses.length} টি কোর্স খুঁজে পেয়েছি</p>
         </div>
       </section>
@@ -35,6 +38,17 @@ export default function SearchResults() {
           </div>
         )}
       </section>
+    </>
+  );
+}
+
+export default function SearchResults() {
+  return (
+    <main style={{ backgroundColor: '#f9fafb', minHeight: '100vh' }}>
+      <Navbar />
+      <Suspense fallback={<div className="container py-20">লোড হচ্ছে...</div>}>
+        <SearchContent />
+      </Suspense>
       <Footer />
     </main>
   );

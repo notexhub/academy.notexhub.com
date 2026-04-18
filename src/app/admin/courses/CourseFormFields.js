@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, ImageIcon, ChevronRight, ChevronLeft, CheckCircle2, BookOpen, DollarSign, Video, FileText, UploadCloud } from 'lucide-react';
+import { Plus, Trash2, ImageIcon, ChevronRight, ChevronLeft, CheckCircle2, BookOpen, DollarSign, Video, FileText, UploadCloud, Lock, Loader2, Save } from 'lucide-react';
 
 const EMPTY = { title: '', description: '', category: '', isFree: false, isActive: true, price: 1500, bannerBase64: '', subscriptionOnly: false, whatYouLearn: [''], modules: [], resources: [] };
 
