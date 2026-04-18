@@ -55,14 +55,20 @@ export default function Navbar() {
       <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '100%', gap: '1rem' }}>
         {/* Logo */}
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexShrink: 0 }}>
-          {logoData ? (
-             <img src={logoData} alt="Platform Logo" style={{ height: '36px', objectFit: 'contain' }} />
-          ) : (
-            <>
-              <div className="logo-mark"><span>N</span></div>
-              <span className="logo-text">নোটেক্সহাব</span>
-            </>
-          )}
+          <img 
+            src="/logo.png" 
+            alt="NotexHub Academy Logo" 
+            style={{ 
+              height: '64px', 
+              width: 'auto', 
+              objectFit: 'contain',
+              mixBlendMode: 'multiply',
+              marginTop: '-10px',
+              transition: 'all 0.3s ease',
+              cursor: 'pointer'
+            }} 
+            className="hover:scale-105"
+          />
         </Link>
 
         {/* Nav Links */}

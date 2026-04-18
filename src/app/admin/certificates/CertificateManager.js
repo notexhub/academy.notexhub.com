@@ -171,7 +171,7 @@ export default function CertificateManager() {
                           </div>
                         )}
                         <div className="w-full flex justify-center h-full items-center">
-                           {cfg.logoBase64 ? <img src={cfg.logoBase64} className="h-full object-contain" /> : <div className="text-[#004b87] font-black text-xs tracking-tighter">NOTEX<span className="text-[#f58220]">HUB</span></div>}
+                           {cfg.logoBase64 ? <img src={cfg.logoBase64} className="h-full object-contain" /> : <img src="/logo.png" className="h-full object-contain" />}
                         </div>
                       </div>
                       

@@ -12,6 +12,9 @@ export const metadata = {
   title: 'নোটেক্সহাব — বাংলাদেশের সেরা অনলাইন লার্নিং প্ল্যাটফর্ম',
   description: 'হাতে কলমে প্রজেক্ট শিখুন এবং দেশের সেরা কোম্পানিতে ক্যারিয়ার গড়ুন। NotexHub-এ আপনাকে স্বাগতম।',
   keywords: 'online learning, bangla course, web development, design, marketing, bangladesh',
+  icons: {
+    icon: '/favicon.png',
+  },
 };
 
 export const viewport = { width: 'device-width', initialScale: 1 };

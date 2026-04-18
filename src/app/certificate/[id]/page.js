@@ -139,17 +139,7 @@ export default function CertificateView() {
                 {logo ? (
                   <img src={logo} alt="Company Logo" className="h-full max-w-[350px] object-contain drop-shadow-sm" />
                 ) : (
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 md:w-10 md:h-10 border-2 border-[#f58220] flex items-center justify-center text-[#f58220]">
-                       <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[14px] border-transparent border-b-[#f58220]" />
-                    </div>
-                    <div>
-                      <h1 className="text-3xl md:text-4xl font-sans-bold text-[#004b87] tracking-tighter" style={{ fontWeight: 900 }}>
-                        <span className="text-[#004b87]">NOTEX</span><span className="text-[#f58220]">HUB</span> <span className="text-[22px] font-semibold tracking-normal lowercase opacity-80 italic">academy</span>
-                      </h1>
-                      <p className="text-[9px] text-[#f58220] uppercase font-bold tracking-widest mt-[-2px] ml-1">Since 2024</p>
-                    </div>
-                  </div>
+                  <img src="/logo.png" alt="NotexHub Academy Logo" className="h-full max-w-[350px] object-contain" />
                 )}
               </div>
             </div>

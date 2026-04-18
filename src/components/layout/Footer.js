@@ -30,11 +30,18 @@ export default function Footer() {
       <div className="container" style={{ padding: '64px 1.5rem 40px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '3rem', marginBottom: '3rem' }}>
           <div>
-            <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.2rem', width: 'fit-content' }}>
-              <div style={{ width: 38, height: 38, background: 'var(--lime)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ color: 'var(--navy)', fontWeight: 900, fontSize: '1.3rem' }}>N</span>
-              </div>
-              <span style={{ fontSize: '1.3rem', fontWeight: 800, color: 'white' }}>নোটেক্সহাব</span>
+            <Link href="/" style={{ marginBottom: '1.2rem', display: 'block' }}>
+              <img 
+                src="/logo.png" 
+                alt="NotexHub Academy Logo" 
+                style={{ 
+                  height: '64px', 
+                  width: 'auto', 
+                  objectFit: 'contain',
+                  filter: 'brightness(0) invert(1)', // Makes the logo all white
+                  opacity: 0.9
+                }} 
+              />
             </Link>
             <p style={{ color: '#94a3b8', lineHeight: 1.8, fontSize: 'var(--text-sm)', maxWidth: 300 }}>
               বাংলাদেশের সেরা অনলাইন লার্নিং প্ল্যাটফর্ম। একটি সাবস্ক্রিপশনে ২০০+ কোর্স, ডাউনলোড ও সার্টিফিকেট।
@@ -62,10 +69,9 @@ export default function Footer() {
             </div>
           ))}
         </div>
-        <div style={{ borderTop: '1px solid #1e3a5f', paddingTop: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <p style={{ color: '#64748b', fontSize: 'var(--text-sm)' }}>© 2025 নোটেক্সহাব। সকল স্বত্ব সংরক্ষিত।</p>
-          <p style={{ color: '#64748b', fontSize: 'var(--text-xs)', display: 'flex', alignItems: 'center', gap: 5 }}>
-            Made with <Heart size={12} style={{ color: '#ef4444', fill: '#ef4444' }} /> in Bangladesh
+        <div style={{ borderTop: '1px solid #1e3a5f', paddingTop: '1.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <p style={{ color: '#64748b', fontSize: 'var(--text-sm)', fontWeight: 500 }}>
+            A Product of <a href="https://www.notexhub.com/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--lime)', fontWeight: 700, textDecoration: 'none' }}>NotexHub</a>
           </p>
         </div>
       </div>
