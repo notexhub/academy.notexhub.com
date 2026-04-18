@@ -1,13 +1,17 @@
 'use client';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { CheckCircle2 } from 'lucide-react';
+import { Suspense } from 'react';
 
-export default function LoginPage() {
+function LoginContent() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get('redirect');
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -15,11 +19,21 @@ export default function LoginPage() {
     try {
       const res = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
       const data = await res.json();
-      if (res.ok) router.push(data.role === 'admin' ? '/admin' : '/dashboard');
+      if (res.ok) {
+        if (redirect) router.push(redirect);
+        else router.push(data.role === 'admin' ? '/admin' : '/dashboard');
+      }
       else setError(data.error || 'লগইন ব্যর্থ হয়েছে');
     } catch { setError('নেটওয়ার্ক সমস্যা হয়েছে'); }
     setLoading(false);
   };
+
+  const benefits = [
+    { text: 'বিশেষজ্ঞ ইন্সট্রাক্টর' },
+    { text: 'লাইফটাইম এক্সেস' },
+    { text: 'সার্টিফিকেট প্রোগ্রাম' },
+    { text: 'ক্যারিয়ার সাপোর্ট' }
+  ];
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--gray-50)', display: 'flex' }}>
@@ -34,9 +48,11 @@ export default function LoginPage() {
         </Link>
         <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: 'white', lineHeight: 1.3, marginBottom: '1rem' }}>হাজারো শিক্ষার্থীর সাথে শিখুন</h2>
         <p style={{ color: '#64748b', fontSize: 'var(--text-lg)', lineHeight: 1.8 }}>বাংলাদেশের সেরা ইন্ডাস্ট্রি মেন্টরদের কাছ থেকে হাতে–কলমে শিখুন।</p>
-        <div style={{ marginTop: '3rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {['✅ বিশেষজ্ঞ ইন্সট্রাক্টর', '✅ লাইফটাইম এক্সেস', '✅ সার্টিফিকেট প্রোগ্রাম', '✅ ক্যারিয়ার সাপোর্ট'].map(t => (
-            <p key={t} style={{ color: '#94a3b8', fontSize: 'var(--text-sm)' }}>{t}</p>
+        <div style={{ marginTop: '3rem', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+          {benefits.map(b => (
+            <div key={b.text} style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#94a3b8', fontSize: 'var(--text-sm)' }}>
+              <CheckCircle2 size={16} style={{ color: 'var(--lime)', flexShrink: 0 }} /> {b.text}
+            </div>
           ))}
         </div>
       </div>
@@ -61,10 +77,18 @@ export default function LoginPage() {
             </button>
           </form>
           <p style={{ textAlign: 'center', color: 'var(--gray-500)', marginTop: '1.5rem', fontSize: 'var(--text-sm)' }}>
-            অ্যাকাউন্ট নেই? <Link href="/register" style={{ color: 'var(--navy)', fontWeight: 700 }}>বিনামূল্যে রেজিস্ট্রেশন করুন</Link>
+            অ্যাকাউন্ট নেই? <Link href={redirect ? `/register?redirect=${encodeURIComponent(redirect)}` : "/register"} style={{ color: 'var(--navy)', fontWeight: 700 }}>বিনামূল্যে রেজিস্ট্রেশন করুন</Link>
           </p>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">লোড হচ্ছে...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

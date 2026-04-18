@@ -1,6 +1,7 @@
 import dbConnect from '@/lib/mongodb';
 import Course from '@/models/Course';
 import User from '@/models/User';
+import Enrollment from '@/models/Enrollment';
 import { verifyToken } from '@/lib/jwt';
 import { cookies } from 'next/headers';
 import CourseViewer from './CourseViewer';
@@ -24,8 +25,20 @@ export default async function LearnPage({ params }) {
   if (!rawCourse) redirect('/courses');
   if (dbUser?.blocked) redirect('/login?blocked=1');
 
-  const hasSub = dbUser?.subscription?.plan && dbUser.subscription.plan !== 'none' && new Date(dbUser.subscription.expiresAt) > new Date();
-  if (!rawCourse.isFree && !hasSub && dbUser?.role !== 'admin') redirect(`/courses/${params.courseId}`);
+  // Admin can always access
+  if (dbUser?.role !== 'admin') {
+    // Check enrollment
+    const enrollment = await Enrollment.findOne({
+      userId: dbUser?._id,
+      courseId: rawCourse._id
+    }).lean();
+
+    if (!enrollment) redirect(`/courses/${rawCourse._id}`);
+
+    // Paid course extra guard: subscription still required to watch
+    const hasSub = dbUser?.subscription?.plan && dbUser.subscription.plan !== 'none' && new Date(dbUser.subscription.expiresAt) > new Date();
+    if (!rawCourse.isFree && !hasSub) redirect(`/courses/${rawCourse._id}`);
+  }
 
   const course = JSON.parse(JSON.stringify(rawCourse));
   const userProgress = dbUser?.progress?.find(p => String(p.courseId) === params.courseId);
@@ -33,3 +46,4 @@ export default async function LearnPage({ params }) {
 
   return <CourseViewer course={course} initialProgress={initialProgress} />;
 }
+

@@ -2,63 +2,121 @@ import dbConnect from '@/lib/mongodb';
 import Course from '@/models/Course';
 import User from '@/models/User';
 import Review from '@/models/Review';
+import Certificate from '@/models/Certificate';
+import { BookOpen, Users, Star, TrendingUp, ArrowUpRight, Activity, Clock, ShieldCheck } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminDashboard() {
   await dbConnect();
-  const [courses, users, reviews] = await Promise.all([
-    Course.countDocuments(), User.countDocuments(), Review.countDocuments()
+  
+  // Basic Stats
+  const [courses, users, reviews, certs] = await Promise.all([
+    Course.countDocuments(), 
+    User.countDocuments(), 
+    Review.countDocuments(),
+    Certificate.find({}).sort({ createdAt: -1 }).limit(5).populate('userId', 'name').populate('courseId', 'title').lean()
   ]);
 
+  // Recent Users
+  const recentUsers = await User.find({}).sort({ createdAt: -1 }).limit(5).lean();
+
   const stats = [
-    { label: 'মোট কোর্স', value: courses, icon: '🎓', color: '#dbeafe', trend: '+2 এই মাসে' },
-    { label: 'মোট শিক্ষার্থী', value: users, icon: '👥', color: '#d1fae5', trend: '+48 এই মাসে' },
-    { label: 'রিভিউ', value: reviews, icon: '⭐', color: '#fef3c7', trend: '+12 এই সপ্তাহে' },
-    { label: 'আয় (এই মাসে)', value: '৳৪৫,০০০', icon: '💰', color: '#ede9fe', trend: '+৳৮,০০০' },
+    { label: 'মোট কোর্স', value: courses, icon: BookOpen, color: '#dbeafe', iconColor: '#2563eb', trend: '+2 এই মাসে' },
+    { label: 'মোট শিক্ষার্থী', value: users, icon: Users, color: '#dcfce7', iconColor: '#16a34a', trend: '+48 এই মাসে' },
+    { label: 'রিভিউ সংখ্যা', value: reviews, icon: Star, color: '#fef9c3', iconColor: '#ca8a04', trend: '+12 এই সপ্তাহে' },
+    { label: 'মাসিক আয়', value: '৳৪৫,০০০', icon: TrendingUp, color: '#fce7f3', iconColor: '#db2777', trend: '+৳৮,০০০' },
   ];
 
   const quickLinks = [
-    { l: '/admin/courses', t: 'নতুন কোর্স যোগ করুন', s: 'ভিডিও মডিউলসহ নতুন কোর্স তৈরি করুন', i: '🎓' },
-    { l: '/admin/users', t: 'ইউজার ম্যানেজ করুন', s: 'সাবস্ক্রিপশন এবং ব্লক ব্যবস্থাপনা', i: '👥' },
-    { l: '/admin/certificates', t: 'সার্টিফিকেট অনুমোদন', s: 'পেন্ডিং সার্টিফিকেট রিভিউ করুন', i: '🏆' },
-    { l: '/admin/reviews', t: 'রিভিউ ম্যানেজ করুন', s: 'হোমপেজ টেস্টিমোনিয়াল নিয়ন্ত্রণ', i: '⭐' },
+    { href: '/admin/courses', title: 'কোর্স ম্যানেজমেন্ট', desc: 'ভিডিও মডিউলসহ কোর্স তৈরি ও সম্পাদনা', color: '#dbeafe', border: '#bfdbfe' },
+    { href: '/admin/users', title: 'ইউজার ম্যানেজমেন্ট', desc: 'সাবস্ক্রিপশন ও ব্লক নিয়ন্ত্রণ', color: '#dcfce7', border: '#bbf7d0' },
+    { href: '/admin/certificates', title: 'সার্টিফিকেট অনুমোদন', desc: 'পেন্ডিং সার্টিফিকেট রিভিউ করুন', color: '#fef9c3', border: '#fef08a' },
+    { href: '/admin/reviews', title: 'রিভিউ ম্যানেজমেন্ট', desc: 'হোমপেজ টেস্টিমোনিয়াল নিয়ন্ত্রণ', color: '#fce7f3', border: '#fbcfe8' },
   ];
 
   return (
     <div>
-      <div style={{ marginBottom: '2rem' }}>
-        <h2 style={{ fontSize: 'var(--text-2xl)', fontWeight: 800 }}>ওভারভিউ</h2>
-        <p style={{ color: 'var(--gray-500)', marginTop: '0.25rem', fontSize: 'var(--text-sm)' }}>আপনার প্ল্যাটফর্মের সামগ্রিক পরিসংখ্যান</p>
+      <div className="mb-8">
+        <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: '#94a3b8' }}>ওভারভিউ</p>
+        <h2 className="text-3xl font-black" style={{ color: '#0f172a', letterSpacing: '-0.03em' }}>স্বাগতম, Admin 👋</h2>
+        <p className="mt-1 text-sm" style={{ color: '#64748b' }}>আপনার প্ল্যাটফর্মের সামগ্রিক পরিসংখ্যান</p>
       </div>
 
       {/* Stats Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.25rem', marginBottom: '2.5rem' }}>
-        {stats.map((s, i) => (
-          <div key={i} style={{ background: 'white', border: '1px solid var(--gray-200)', borderRadius: 'var(--radius-lg)', padding: '1.5rem', boxShadow: 'var(--shadow-xs)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-              <div style={{ width: 48, height: 48, background: s.color, borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>{s.icon}</div>
+      <div className="grid grid-cols-4 gap-5 mb-8">
+        {stats.map((s, i) => {
+          const Icon = s.icon;
+          return (
+            <div key={i} className="rounded-2xl p-5" style={{ background: '#fff', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: s.color }}>
+                  <Icon size={20} style={{ color: s.iconColor }} />
+                </div>
+                <span className="text-xs font-semibold flex items-center gap-1" style={{ color: '#16a34a' }}>
+                  <ArrowUpRight size={12} />{s.trend}
+                </span>
+              </div>
+              <p className="text-3xl font-black mb-0.5" style={{ color: '#0f172a', letterSpacing: '-0.03em' }}>{s.value}</p>
+              <p className="text-sm" style={{ color: '#64748b' }}>{s.label}</p>
             </div>
-            <p style={{ fontSize: '2rem', fontWeight: 800, lineHeight: 1 }}>{s.value}</p>
-            <p style={{ color: 'var(--gray-500)', fontSize: 'var(--text-sm)', marginTop: '0.25rem' }}>{s.label}</p>
-            <p style={{ color: '#16a34a', fontSize: 'var(--text-xs)', fontWeight: 600, marginTop: '0.5rem' }}>↑ {s.trend}</p>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      {/* Quick Actions */}
-      <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 700, marginBottom: '1.25rem' }}>দ্রুত কাজ করুন</h3>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.25rem' }}>
-        {quickLinks.map(q => (
-          <a key={q.l} href={q.l} style={{ background: 'white', border: '1px solid var(--gray-200)', borderRadius: 'var(--radius-lg)', padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none', transition: 'var(--transition)', boxShadow: 'var(--shadow-xs)' }}>
-            <span style={{ fontSize: '2rem', width: 52, height: 52, background: 'var(--gray-50)', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{q.i}</span>
-            <div>
-              <p style={{ fontWeight: 700, color: 'var(--gray-900)', fontSize: 'var(--text-sm)', marginBottom: '0.2rem' }}>{q.t}</p>
-              <p style={{ color: 'var(--gray-500)', fontSize: 'var(--text-xs)' }}>{q.s}</p>
+      <div className="grid grid-cols-3 gap-6 mb-8">
+        {/* Quick Actions (2 cols) */}
+        <div className="col-span-2">
+          <h3 className="text-base font-bold mb-4" style={{ color: '#0f172a' }}>দ্রুত অ্যাকশন</h3>
+          <div className="grid grid-cols-2 gap-4">
+            {quickLinks.map((q, i) => (
+              <a key={i} href={q.href} className="flex items-center gap-4 rounded-2xl p-5 no-underline transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 group"
+                style={{ background: '#fff', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                <div className="w-12 h-12 rounded-xl flex-shrink-0" style={{ background: q.color, border: `1px solid ${q.border}` }}></div>
+                <div>
+                  <p className="font-bold text-sm mb-0.5" style={{ color: '#0f172a' }}>{q.title}</p>
+                  <p className="text-xs" style={{ color: '#94a3b8' }}>{q.desc}</p>
+                </div>
+                <ArrowUpRight size={16} className="ml-auto flex-shrink-0 text-[#cbd5e1] group-hover:text-[#0f172a] transition-colors" />
+              </a>
+            ))}
+          </div>
+        </div>
+
+        {/* Recent Activity (1 col) */}
+        <div className="col-span-1">
+          <h3 className="text-base font-bold mb-4" style={{ color: '#0f172a' }}>সাম্প্রতিক অ্যাক্টিভিটি</h3>
+          <div className="bg-white rounded-2xl border border-[#f1f5f9] p-5 shadow-sm h-[220px] overflow-y-auto">
+            <div className="space-y-4">
+              {certs.map((c, i) => (
+                <div key={`cert-${i}`} className="flex gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[#fef9c3] flex items-center justify-center shrink-0">
+                    <ShieldCheck size={14} className="text-[#a16207]" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-[#0f172a] truncate leading-tight">
+                      {c.userId?.name || 'Unknown'} <span className="font-normal text-[#64748b]">requested certificate</span>
+                    </p>
+                    <p className="text-xs text-[#94a3b8] truncate">{c.courseId?.title}</p>
+                  </div>
+                </div>
+              ))}
+              {recentUsers.map((u, i) => (
+                <div key={`user-${i}`} className="flex gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[#dcfce7] flex items-center justify-center shrink-0 text-xs font-bold text-[#15803d]">
+                    {u.name?.[0]?.toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-[#0f172a] truncate leading-tight">
+                      {u.name} <span className="font-normal text-[#64748b]">registered</span>
+                    </p>
+                    <p className="text-xs text-[#94a3b8] flex items-center gap-1"><Clock size={10} /> {new Date(u.createdAt || Date.now()).toLocaleDateString()}</p>
+                  </div>
+                </div>
+              ))}
             </div>
-            <span style={{ marginLeft: 'auto', color: 'var(--gray-300)' }}>→</span>
-          </a>
-        ))}
+          </div>
+        </div>
       </div>
     </div>
   );

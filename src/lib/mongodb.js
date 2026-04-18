@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/notexhub';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://stock_market:LMWQvSeusjSck0FO@cluster0.xm8ksdz.mongodb.net/notex_academy?retryWrites=true&w=majority';
 
 if (!MONGODB_URI) {
   throw new Error('Please define the MONGODB_URI environment variable inside .env.local');

@@ -16,6 +16,11 @@ const CourseSchema = new mongoose.Schema({
   price: { type: Number, default: 1500 },
   bannerBase64: { type: String, default: '' },
   whatYouLearn: [{ type: String }],
+  resources: [{ 
+    title: { type: String, required: true },
+    fileData: { type: String, required: true },
+    fileName: { type: String, default: '' }
+  }],
   modules: [ModuleSchema],
   subscriptionOnly: { type: Boolean, default: false },
 }, { timestamps: true });

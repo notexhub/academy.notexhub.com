@@ -1,5 +1,6 @@
 import dbConnect from '@/lib/mongodb';
 import Course from '@/models/Course';
+import User from '@/models/User';
 import { verifyToken } from '@/lib/jwt';
 import { cookies } from 'next/headers';
 import Navbar from '@/components/layout/Navbar';
@@ -7,6 +8,7 @@ import Footer from '@/components/layout/Footer';
 import EnrollSidebar from '@/components/courses/EnrollSidebar';
 import SyllabusAccordion from '@/components/courses/SyllabusAccordion';
 import Link from 'next/link';
+import { Star, Users, Video, Calendar, CheckCircle2, GraduationCap, ArrowRight } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,7 +18,16 @@ export default async function CourseDetailPage({ params }) {
   if (!raw) return <div>Course not found</div>;
   const course = JSON.parse(JSON.stringify(raw));
   const token = cookies().get('auth_token')?.value;
-  const user = token ? await verifyToken(token).catch(() => null) : null;
+  const decoded = token ? await verifyToken(token).catch(() => null) : null;
+
+  // Get full user with subscription info from DB
+  let user = null;
+  if (decoded?.userId) {
+    const dbUser = await User.findById(decoded.userId).select('name email role blocked subscription').lean();
+    if (dbUser) {
+      user = JSON.parse(JSON.stringify(dbUser));
+    }
+  }
 
   const learns = course.whatYouLearn || ['হাতে–কলমে প্রজেক্ট বানাবেন', 'ইন্ডাস্ট্রি স্ট্যান্ডার্ড কোড লিখবেন', 'ফ্রিল্যান্সিং শুরু করতে পারবেন', 'লাইভ ডিপ্লয়মেন্ট করতে পারবেন', 'ব্যবহারকারীর চাহিদা অনুযায়ী ডিজাইন করবেন', 'সিভি ও পোর্টফোলিও তৈরি করবেন'];
 
@@ -34,11 +45,11 @@ export default async function CourseDetailPage({ params }) {
             </div>
             <h1 style={{ fontSize: '2.4rem', fontWeight: 800, lineHeight: 1.25, marginBottom: '1rem' }}>{course.title}</h1>
             <p style={{ color: '#cbd5e1', fontSize: 'var(--text-lg)', lineHeight: 1.7, marginBottom: '1.5rem' }}>{course.description}</p>
-            <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', fontSize: 'var(--text-sm)', color: '#94a3b8' }}>
-              <span>⭐ <strong style={{ color: '#fbbf24' }}>5.0</strong> (৫৪৮ রিভিউ)</span>
-              <span>👥 ২,৫০০+ শিক্ষার্থী</span>
-              <span>📹 {course.modules?.length || 0} টি লেকচার</span>
-              <span>🕐 সর্বশেষ আপডেট: ২০২৫</span>
+            <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', fontSize: 'var(--text-sm)', color: '#94a3b8', alignItems: 'center' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Star size={14} style={{ color: '#fbbf24', fill: '#fbbf24' }} /> <strong style={{ color: '#fbbf24' }}>5.0</strong> (৫৪৮ রিভিউ)</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Users size={14} /> ২,৫০০+ শিক্ষার্থী</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Video size={14} /> {course.modules?.length || 0} টি লেকচার</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Calendar size={14} /> সর্বশেষ আপডেট: ২০২৫</span>
               <span className={`badge ${course.isFree ? 'badge-free' : 'badge-premium'}`}>{course.isFree ? 'বিনামূল্যে' : 'প্রিমিয়াম'}</span>
             </div>
           </div>
@@ -61,7 +72,7 @@ export default async function CourseDetailPage({ params }) {
           <section id="learn" style={{ background: 'white', border: '1px solid var(--gray-200)', borderRadius: 'var(--radius-lg)', padding: '2rem', marginBottom: '2rem' }}>
             <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 800, marginBottom: '1.5rem' }}>এই কোর্সে কি কি শিখবেন</h2>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-              {learns.map((l, i) => <p key={i} style={{ display: 'flex', gap: '0.5rem', fontSize: 'var(--text-sm)', color: 'var(--gray-700)' }}><span style={{ color: 'var(--lime-hover)', flexShrink: 0 }}>✓</span>{l}</p>)}
+              {learns.map((l, i) => <p key={i} style={{ display: 'flex', gap: '0.75rem', fontSize: 'var(--text-sm)', color: 'var(--gray-700)', alignItems: 'flex-start' }}><CheckCircle2 size={16} style={{ color: '#15803d', flexShrink: 0, marginTop: 1 }} />{l}</p>)}
             </div>
           </section>
 
@@ -78,7 +89,9 @@ export default async function CourseDetailPage({ params }) {
           <section id="instructor" style={{ background: 'white', border: '1px solid var(--gray-200)', borderRadius: 'var(--radius-lg)', padding: '2rem' }}>
             <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 800, marginBottom: '1.5rem' }}>ইন্সট্রাক্টর পরিচিতি</h2>
             <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
-              <div className="avatar avatar-lg" style={{ fontSize: '1.5rem' }}>🎓</div>
+              <div className="w-16 h-16 rounded-2xl bg-[#0f172a] text-[#CCFF00] flex items-center justify-center flex-shrink-0 shadow-lg" style={{ fontSize: '1.5rem' }}>
+                <GraduationCap size={32} />
+              </div>
               <div>
                 <h3 style={{ fontWeight: 700, marginBottom: '0.25rem' }}>NotexHub Expert Team</h3>
                 <p style={{ color: '#5a7a00', fontSize: 'var(--text-sm)', fontWeight: 600, marginBottom: '0.75rem' }}>সিনিয়র ইন্সট্রাক্টর ও মেন্টর</p>

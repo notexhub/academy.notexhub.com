@@ -1,10 +1,11 @@
 'use client';
+import { BookOpen, Code2, Palette, Megaphone, BarChart2, Briefcase } from 'lucide-react';
 
 export default function CourseFilters() {
   const cats = [
-    { n: 'সকল কোর্স', i: '📚' }, { n: 'ওয়েব ডেভেলপমেন্ট', i: '💻' },
-    { n: 'গ্রাফিক ডিজাইন', i: '🎨' }, { n: 'ডিজিটাল মার্কেটিং', i: '📱' },
-    { n: 'ডেটা সায়েন্স', i: '🔬' }, { n: 'বিজনেস', i: '📊' },
+    { n: 'সকল কোর্স', i: BookOpen }, { n: 'ওয়েব ডেভেলপমেন্ট', i: Code2 },
+    { n: 'গ্রাফিক ডিজাইন', i: Palette }, { n: 'ডিজিটাল মার্কেটিং', i: Megaphone },
+    { n: 'ডেটা সায়েন্স', i: BarChart2 }, { n: 'বিজনেস', i: Briefcase },
   ];
 
   return (
@@ -22,7 +23,7 @@ export default function CourseFilters() {
             fontSize: 'var(--text-sm)', color: i === 0 ? '#15803d' : 'var(--gray-700)',
             borderLeft: i === 0 ? '3px solid var(--lime)' : '3px solid transparent',
             transition: 'var(--transition)',
-          }}><span>{c.i}</span>{c.n}</button>
+          }}><c.i size={16} />{c.n}</button>
         ))}
         <div style={{ padding: '1rem 1.25rem', borderTop: '1px solid var(--gray-100)' }}>
           <p style={{ fontSize: 'var(--text-xs)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--gray-500)', marginBottom: '0.75rem' }}>কোর্স টাইপ</p>

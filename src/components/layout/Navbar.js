@@ -2,12 +2,35 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { LayoutDashboard, LogOut, Search } from 'lucide-react';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [q, setQ] = useState('');
   const pathname = usePathname();
   const router = useRouter();
+  const [authLoading, setAuthLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [logoData, setLogoData] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then(r => r.json())
+      .then(d => {
+        if (d.authenticated && d.user) setUser(d.user);
+        setAuthLoading(false);
+      })
+      .catch(() => setAuthLoading(false));
+
+    fetch('/api/settings')
+      .then(r => r.json())
+      .then(d => {
+        if (d && d.websiteLogoBase64) {
+          setLogoData(d.websiteLogoBase64);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 10);
@@ -32,8 +55,14 @@ export default function Navbar() {
       <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '100%', gap: '1rem' }}>
         {/* Logo */}
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexShrink: 0 }}>
-          <div className="logo-mark"><span>N</span></div>
-          <span className="logo-text">নোটেক্সহাব</span>
+          {logoData ? (
+             <img src={logoData} alt="Platform Logo" style={{ height: '36px', objectFit: 'contain' }} />
+          ) : (
+            <>
+              <div className="logo-mark"><span>N</span></div>
+              <span className="logo-text">নোটেক্সহাব</span>
+            </>
+          )}
         </Link>
 
         {/* Nav Links */}
@@ -51,7 +80,7 @@ export default function Navbar() {
 
         {/* Search */}
         <div style={{ position: 'relative', flex: '0 1 280px' }}>
-          <span style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--gray-400)', fontSize: '0.9rem', pointerEvents: 'none' }}>🔍</span>
+          <Search size={15} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--gray-400)', pointerEvents: 'none' }} />
           <input
             value={q} onChange={e => setQ(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && q.trim() && router.push(`/search?q=${encodeURIComponent(q)}`)}
@@ -63,8 +92,30 @@ export default function Navbar() {
 
         {/* Auth Buttons */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexShrink: 0 }}>
-          <Link href="/login" className="btn btn-outline btn-sm">লগ ইন</Link>
-          <Link href="/register" className="btn btn-navy btn-sm">জয়েন করুন</Link>
+          {authLoading ? (
+             <div style={{ width: 150, height: 38, background: 'var(--gray-200)', borderRadius: 'var(--radius-full)', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
+          ) : user ? (
+            <div className="flex items-center gap-2">
+              <div className="hidden md:flex items-center gap-2 pr-3 pl-1 py-1 bg-[#f8fafc] rounded-full border border-[#f1f5f9] mr-1">
+                 <div className="w-7 h-7 rounded-full bg-[#0f172a] text-[#CCFF00] flex items-center justify-center font-black text-xs">
+                   {user.name?.[0]?.toUpperCase()}
+                 </div>
+                 <span className="text-[12px] font-bold text-[#0f172a] whitespace-nowrap">{user.name?.split(' ')[0]}</span>
+              </div>
+
+              <Link href={user.role === 'admin' ? '/admin' : '/dashboard'} className="flex items-center gap-1.5 px-4 py-2 bg-[#0f172a] text-[#CCFF00] rounded-full text-[13px] font-bold hover:bg-[#1e293b] transition-colors shadow-sm whitespace-nowrap">
+                <LayoutDashboard size={15} /> ড্যাশবোর্ড
+              </Link>
+              <Link href="/api/auth/logout" className="flex items-center gap-1.5 px-4 py-2 bg-white text-[#ef4444] border border-[#fee2e2] rounded-full text-[13px] font-bold hover:bg-[#fef2f2] transition-colors shadow-sm whitespace-nowrap">
+                <LogOut size={15} /> লগ আউট
+              </Link>
+            </div>
+          ) : (
+            <>
+              <Link href="/login" className="btn btn-outline btn-sm">লগ ইন</Link>
+              <Link href="/register" className="btn btn-navy btn-sm">জয়েন করুন</Link>
+            </>
+          )}
         </div>
       </div>
     </header>

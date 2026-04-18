@@ -1,4 +1,6 @@
+'use client';
 import Link from 'next/link';
+import { Heart, Share2, Send, Globe, PlayCircle } from 'lucide-react';
 
 const cols = {
   'কোর্সসমূহ': [
@@ -15,6 +17,13 @@ const cols = {
   ],
 };
 
+const socials = [
+  { icon: Share2, href: '#', label: 'Facebook' },
+  { icon: Send, href: '#', label: 'Twitter' },
+  { icon: Globe, href: '#', label: 'LinkedIn' },
+  { icon: PlayCircle, href: '#', label: 'YouTube' },
+];
+
 export default function Footer() {
   return (
     <footer style={{ background: 'var(--navy)', color: 'var(--white)' }}>
@@ -28,11 +37,17 @@ export default function Footer() {
               <span style={{ fontSize: '1.3rem', fontWeight: 800, color: 'white' }}>নোটেক্সহাব</span>
             </Link>
             <p style={{ color: '#94a3b8', lineHeight: 1.8, fontSize: 'var(--text-sm)', maxWidth: 300 }}>
-              বাংলাদেশের সেরা অনলাইন লার্নিং প্ল্যাটফর্ম। হাতে–কলমে প্রজেক্ট করে ক্যারিয়ার গড়ুন।
+              বাংলাদেশের সেরা অনলাইন লার্নিং প্ল্যাটফর্ম। একটি সাবস্ক্রিপশনে ২০০+ কোর্স, ডাউনলোড ও সার্টিফিকেট।
             </p>
-            <div style={{ display: 'flex', gap: '0.8rem', marginTop: '1.5rem' }}>
-              {['📘', '🐦', '💼', '▶️'].map((icon, i) => (
-                <div key={i} style={{ width: 36, height: 36, background: '#1e3a5f', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '1rem' }}>{icon}</div>
+            <div style={{ display: 'flex', gap: '0.6rem', marginTop: '1.5rem' }}>
+              {socials.map(({ icon: Icon, href, label }) => (
+                <a key={label} href={href} aria-label={label}
+                  style={{ width: 36, height: 36, background: '#1e3a5f', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#94a3b8', transition: 'all 0.2s', textDecoration: 'none' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#CCFF00'; e.currentTarget.style.color = '#0a1628'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = '#1e3a5f'; e.currentTarget.style.color = '#94a3b8'; }}
+                >
+                  <Icon size={16} />
+                </a>
               ))}
             </div>
           </div>
@@ -49,7 +64,9 @@ export default function Footer() {
         </div>
         <div style={{ borderTop: '1px solid #1e3a5f', paddingTop: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <p style={{ color: '#64748b', fontSize: 'var(--text-sm)' }}>© 2025 নোটেক্সহাব। সকল স্বত্ব সংরক্ষিত।</p>
-          <p style={{ color: '#64748b', fontSize: 'var(--text-xs)' }}>Made with ❤️ in Bangladesh</p>
+          <p style={{ color: '#64748b', fontSize: 'var(--text-xs)', display: 'flex', alignItems: 'center', gap: 5 }}>
+            Made with <Heart size={12} style={{ color: '#ef4444', fill: '#ef4444' }} /> in Bangladesh
+          </p>
         </div>
       </div>
     </footer>

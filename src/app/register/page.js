@@ -1,13 +1,16 @@
 'use client';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Suspense } from 'react';
 
-export default function RegisterPage() {
+function RegisterContent() {
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get('redirect');
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -15,7 +18,10 @@ export default function RegisterPage() {
     try {
       const res = await fetch('/api/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
       const data = await res.json();
-      if (res.ok) router.push('/login?registered=1');
+      if (res.ok) {
+        const loginUrl = redirect ? `/login?registered=1&redirect=${encodeURIComponent(redirect)}` : '/login?registered=1';
+        router.push(loginUrl);
+      }
       else setError(data.error || 'রেজিস্ট্রেশন সম্পন্ন হয়নি');
     } catch { setError('নেটওয়ার্ক সমস্যা হয়েছে'); }
     setLoading(false);
@@ -71,10 +77,18 @@ export default function RegisterPage() {
             রেজিস্ট্রেশন করলে আমাদের <Link href="/terms" style={{ color: 'var(--navy)' }}>Terms of Service</Link> এবং <Link href="/privacy" style={{ color: 'var(--navy)' }}>Privacy Policy</Link> মেনে নিচ্ছেন।
           </p>
           <p style={{ textAlign: 'center', color: 'var(--gray-500)', marginTop: '1.5rem', fontSize: 'var(--text-sm)' }}>
-            অ্যাকাউন্ট আছে? <Link href="/login" style={{ color: 'var(--navy)', fontWeight: 700 }}>লগ ইন করুন</Link>
+            অ্যাকাউন্ট আছে? <Link href={redirect ? `/login?redirect=${encodeURIComponent(redirect)}` : "/login"} style={{ color: 'var(--navy)', fontWeight: 700 }}>লগ ইন করুন</Link>
           </p>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">লোড হচ্ছে...</div>}>
+      <RegisterContent />
+    </Suspense>
   );
 }
