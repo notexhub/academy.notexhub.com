@@ -77,7 +77,7 @@ export default function ReviewManager() {
                       </div>
                     </td>
                     <td className="px-5 py-3.5"><span className="text-xs" style={{ color: '#64748b' }}>{r.role}</span></td>
-                    <td className="px-5 py-3.5"><p className="text-xs line-clamp-2 italic" style={{ color: '#64748b' }}>"{r.quote}"</p></td>
+                    <td className="px-5 py-3.5"><p className="text-xs line-clamp-2 italic" style={{ color: '#64748b' }}>&quot;{r.quote}&quot;</p></td>
                     <td className="px-5 py-3.5">
                       <button onClick={() => remove(r._id)} style={{ background: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: 7, padding: '5px 9px', cursor: 'pointer' }}>
                         <Trash2 size={12} />

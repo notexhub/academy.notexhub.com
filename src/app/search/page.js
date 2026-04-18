@@ -24,7 +24,7 @@ export default function SearchResults() {
       <Navbar />
       <section style={{ backgroundColor: 'var(--navy)', color: 'white', padding: '60px 0' }}>
         <div className="container">
-          <h1>"{qCode}" এর ফলাফল</h1>
+          <h1>&quot;{qCode}&quot; এর ফলাফল</h1>
           <p style={{ marginTop: '0.5rem', color: '#cbd5e0' }}>আমরা {courses.length} টি কোর্স খুঁজে পেয়েছি</p>
         </div>
       </section>
