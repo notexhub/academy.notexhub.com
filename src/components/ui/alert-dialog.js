@@ -3,7 +3,6 @@
 import * as React from "react";
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 import { cn } from "@/lib/utils"
-import { Button } from "./button";
 function AlertDialog({
   ...props
 }) {
@@ -139,9 +138,13 @@ function AlertDialogAction({
   ...props
 }) {
   return (
-    <Button variant={variant} size={size} asChild>
+    <div>
+
+   
+    {/* <Button variant={variant} size={size} asChild>
       <AlertDialogPrimitive.Action data-slot="alert-dialog-action" className={cn(className)} {...props} />
-    </Button>
+    </Button>  */}
+     </div>
   );
 }
 
@@ -152,9 +155,12 @@ function AlertDialogCancel({
   ...props
 }) {
   return (
+     <div>
+{/* 
     <Button variant={variant} size={size} asChild>
       <AlertDialogPrimitive.Cancel data-slot="alert-dialog-cancel" className={cn(className)} {...props} />
-    </Button>
+    </Button> */}
+     </div>
   );
 }
 

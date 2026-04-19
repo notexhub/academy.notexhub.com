@@ -3,8 +3,6 @@ import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 
 import { cn } from "@/lib/utils"
-import { XIcon } from "lucide-react"
-import { Button } from "./button";
 function Dialog({
   ...props
 }) {
@@ -63,10 +61,10 @@ function DialogContent({
         {children}
         {showCloseButton && (
           <DialogPrimitive.Close data-slot="dialog-close" asChild>
-            <Button variant="ghost" className="absolute top-2 right-2" size="icon-sm">
+            {/* <Button variant="ghost" className="absolute top-2 right-2" size="icon-sm">
               <XIcon />
               <span className="sr-only">Close</span>
-            </Button>
+            </Button> */}
           </DialogPrimitive.Close>
         )}
       </DialogPrimitive.Content>
@@ -103,7 +101,7 @@ function DialogFooter({
       {children}
       {showCloseButton && (
         <DialogPrimitive.Close asChild>
-          <Button variant="outline">Close</Button>
+         {/*  <Button variant="outline">Close</Button> */}
         </DialogPrimitive.Close>
       )}
     </div>
