@@ -1,3 +1,4 @@
+'use client';
 import Link from 'next/link';
 import { PlayCircle, Users, Star, BookOpen, Download, Award } from 'lucide-react';
 
