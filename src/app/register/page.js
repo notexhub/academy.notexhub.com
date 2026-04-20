@@ -19,8 +19,8 @@ function RegisterContent() {
       const res = await fetch('/api/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
       const data = await res.json();
       if (res.ok) {
-        if (redirect) router.push(redirect);
-        else router.push(data.role === 'admin' ? '/admin' : '/dashboard');
+        if (redirect) window.location.href = redirect;
+        else window.location.href = data.role === 'admin' ? '/admin' : '/dashboard';
       }
       else setError(data.error || 'রেজিস্ট্রেশন সম্পন্ন হয়নি');
     } catch { setError('নেটওয়ার্ক সমস্যা হয়েছে'); }
