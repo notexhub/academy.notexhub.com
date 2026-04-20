@@ -41,8 +41,13 @@ export default function EnrollSidebar({ course, user: serverUser }) {
     setEnrolling(true);
     setStatusMsg('এনরোলমেন্ট প্রসেস হচ্ছে...');
 
-    // Robust token recovery
+    // Nuclear token recovery
     let token = reduxUser?.token;
+    if (!token && typeof window !== 'undefined') {
+      token = localStorage.getItem('notex_token');
+    }
+    
+    // Legacy fallback (as a last resort)
     if (!token && typeof window !== 'undefined') {
       try {
         const persistData = JSON.parse(localStorage.getItem('persist:notex_root'));
@@ -51,7 +56,7 @@ export default function EnrollSidebar({ course, user: serverUser }) {
           token = authData.token;
         }
       } catch (err) {
-        console.warn('[Enroll] LocalStorage recovery failed:', err);
+        console.warn('[Enroll] Legacy recovery failed:', err);
       }
     }
 

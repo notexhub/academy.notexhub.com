@@ -19,17 +19,23 @@ export default function Navbar() {
   const [sessionLoading, setSessionLoading] = useState(!isAuthenticated);
 
   useEffect(() => {
-    // If not authenticated in Redux, try to fetch from session cookie
+    // If not authenticated in Redux, try to fetch from session cookie or direct localStorage
     if (!isAuthenticated) {
       setSessionLoading(true);
-      fetch('/api/auth/me')
+
+      // Nuclear recovery path
+      const directToken = typeof window !== 'undefined' ? localStorage.getItem('notex_token') : null;
+      const headers = {};
+      if (directToken) headers['Authorization'] = `Bearer ${directToken}`;
+
+      fetch('/api/auth/me', { headers })
         .then(r => r.json())
         .then(d => {
           if (d.authenticated && d.user) {
             // Passive restore: Keep existing token if server doesn't provide one
             dispatch(loginSuccess({ 
               user: d.user, 
-              token: d.token || reduxToken 
+              token: d.token || directToken || reduxToken 
             }));
           }
           setSessionLoading(false);
@@ -60,6 +66,7 @@ export default function Navbar() {
   const handleLogout = async () => {
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
+      if (typeof window !== 'undefined') localStorage.removeItem('notex_token');
       dispatch(logout());
       window.location.href = '/';
     } catch (err) {

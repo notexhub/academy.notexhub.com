@@ -27,10 +27,15 @@ function RegisterContent() {
       });
       const data = await res.json();
       if (res.ok) {
-        // 1. Sync Redux
+        // 1. Nuclear Sync: Direct LocalStorage save
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('notex_token', data.token);
+        }
+
+        // 2. Sync Redux
         dispatch(loginSuccess({ user: data.user, token: data.token }));
         
-        // 2. Small delay to ensure cookie is processed by browser
+        // 3. Small delay to ensure state is committed
         setTimeout(() => {
           if (redirect) window.location.href = redirect;
           else window.location.href = data.user?.role === 'admin' ? '/admin' : '/dashboard';
