@@ -45,9 +45,10 @@ export default function EnrollSidebar({ course, user: serverUser }) {
     let token = reduxUser?.token;
     if (!token && typeof window !== 'undefined') {
       try {
-        const persistData = JSON.parse(localStorage.getItem('persist:auth'));
-        if (persistData && persistData.token) {
-          token = JSON.parse(persistData.token);
+        const persistData = JSON.parse(localStorage.getItem('persist:notex_root'));
+        if (persistData && persistData.auth) {
+          const authData = JSON.parse(persistData.auth);
+          token = authData.token;
         }
       } catch (err) {
         console.warn('[Enroll] LocalStorage recovery failed:', err);
