@@ -34,14 +34,17 @@ export async function POST(request) {
       }
     }, { status: 200 });
 
-    // Definitive Cookie Setting for Vercel
-    response.cookies.set('notex_session', token, {
-      httpOnly: true,
-      secure: true, // Always true for Vercel HTTPS
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 30, // 30 days
-      path: '/',
-    });
+    // Definitive Cookie Setting via Header for maximum compatibility
+    const cookieOptions = [
+      `notex_session=${token}`,
+      'Path=/',
+      'HttpOnly',
+      'Secure',
+      'SameSite=Lax',
+      `Max-Age=${60 * 60 * 24 * 30}`
+    ].join('; ');
+
+    response.headers.set('Set-Cookie', cookieOptions);
 
     return response;
   } catch (err) {

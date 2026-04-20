@@ -14,7 +14,7 @@ export default function Navbar() {
   const router = useRouter();
   const dispatch = useDispatch();
   
-  const { user, isAuthenticated, loading: authLoadingState } = useSelector((state) => state.auth);
+  const { user, isAuthenticated, token: reduxToken, loading: authLoadingState } = useSelector((state) => state.auth);
   const [logoData, setLogoData] = useState(null);
   const [sessionLoading, setSessionLoading] = useState(!isAuthenticated);
 
@@ -26,8 +26,8 @@ export default function Navbar() {
         .then(r => r.json())
         .then(d => {
           if (d.authenticated && d.user) {
-            // Restore session including token if returned
-            dispatch(loginSuccess({ user: d.user, token: d.token || null }));
+            // Restore session including token if returned, or maintain existing
+            dispatch(loginSuccess({ user: d.user, token: d.token || reduxToken }));
           }
           setSessionLoading(false);
         })
