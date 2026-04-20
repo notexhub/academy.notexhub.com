@@ -18,6 +18,7 @@ export default function EnrollSidebar({ course, user: serverUser }) {
   const [enrolled, setEnrolled] = useState(false);
   const [checkingEnroll, setCheckingEnroll] = useState(true);
   const [enrolling, setEnrolling] = useState(false);
+  const [statusMsg, setStatusMsg] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -35,6 +36,7 @@ export default function EnrollSidebar({ course, user: serverUser }) {
   const handleEnroll = async () => {
     if (!user) { window.location.href = `/login?redirect=${encodeURIComponent(`/courses/${id}`)}`; return; }
     setEnrolling(true);
+    setStatusMsg('এনরোলমেন্ট প্রসেস হচ্ছে...');
     try {
       const res = await fetch('/api/user/enroll', {
         method: 'POST',
@@ -46,11 +48,16 @@ export default function EnrollSidebar({ course, user: serverUser }) {
       });
       const data = await res.json();
       if (data.success) {
+        setStatusMsg('অভিনন্দন! এনরোলমেন্ট সফল হয়েছে।');
         setEnrolled(true);
-        router.push(`/learn/${id}`);
+        setTimeout(() => {
+          router.push(`/learn/${id}`);
+        }, 1500);
+      } else {
+        setStatusMsg(data.error || 'এনরোল করতে সমস্যা হয়েছে।');
       }
     } catch {
-      alert('এনরোল করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+      setStatusMsg('নেটওয়ার্ক সমস্যা। আবার চেষ্টা করুন।');
     }
     setEnrolling(false);
   };
@@ -145,6 +152,14 @@ export default function EnrollSidebar({ course, user: serverUser }) {
         {enrolled && !checkingEnroll && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#dcfce7', color: '#15803d', borderRadius: 10, padding: '8px 14px', marginBottom: 12, fontSize: 13, fontWeight: 700 }}>
             <CheckCircle size={15} /> আপনি এই কোর্সে এনরোল করেছেন
+          </div>
+        )}
+
+        {/* Status Message */}
+        {statusMsg && (
+          <div style={{ padding: '10px 14px', borderRadius: 10, background: statusMsg.includes('সফল') ? '#dcfce7' : '#fef2f2', color: statusMsg.includes('সফল') ? '#15803d' : '#ef4444', marginBottom: 12, fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8, animation: 'fadeIn 0.3s ease' }}>
+            {statusMsg.includes('প্রসেস') ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <CheckCircle size={14} />}
+            {statusMsg}
           </div>
         )}
 
