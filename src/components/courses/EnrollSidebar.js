@@ -38,12 +38,28 @@ export default function EnrollSidebar({ course, user: serverUser }) {
 
   const handleEnroll = async () => {
     if (!user) { window.location.href = `/login?redirect=${encodeURIComponent(`/courses/${id}`)}`; return; }
-    const headers = { 'Content-Type': 'application/json' };
-    if (reduxUser?.token) headers['Authorization'] = `Bearer ${reduxUser.token}`;
+    setEnrolling(true);
+    setStatusMsg('এনরোলমেন্ট প্রসেস হচ্ছে...');
 
-    console.log('[Enroll] Starting enrollment process...', { 
-      hasToken: !!reduxUser?.token, 
-      tokenPrefix: reduxUser?.token?.substring(0, 10),
+    // Robust token recovery
+    let token = reduxUser?.token;
+    if (!token && typeof window !== 'undefined') {
+      try {
+        const persistData = JSON.parse(localStorage.getItem('persist:auth'));
+        if (persistData && persistData.token) {
+          token = JSON.parse(persistData.token);
+        }
+      } catch (err) {
+        console.warn('[Enroll] LocalStorage recovery failed:', err);
+      }
+    }
+
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    console.log('[Enroll] Running enrollment...', { 
+      hasToken: !!token, 
+      tokenSource: reduxUser?.token ? 'redux' : (token ? 'localStorage' : 'none'),
       hasUser: !!user 
     });
 
