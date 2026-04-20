@@ -19,11 +19,11 @@ export async function POST(request) {
     const token = await signToken({ userId: user._id.toString(), role: user.role });
     const response = NextResponse.json({ message: 'Logged in successfully', role: user.role }, { status: 200 });
     
-    response.cookies.set('auth_token', token, {
+    response.cookies.set('notex_session', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 604800, // 7 days
+      maxAge: 60 * 60 * 24 * 30, // 30 days
       path: '/',
     });
 

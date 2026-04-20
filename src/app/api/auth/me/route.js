@@ -8,21 +8,21 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const token = cookies().get('auth_token')?.value;
+    const token = cookies().get('notex_session')?.value;
     if (!token) {
-      return NextResponse.json({ authenticated: false }, { status: 401 });
+      return NextResponse.json({ authenticated: false, reason: 'no_cookie' }, { status: 401 });
     }
-
+ 
     const payload = await verifyToken(token);
     if (!payload || !payload.userId) {
-      return NextResponse.json({ authenticated: false }, { status: 401 });
+      return NextResponse.json({ authenticated: false, reason: 'invalid_token' }, { status: 401 });
     }
-
+ 
     await dbConnect();
     const user = await User.findById(payload.userId).select('name email role').lean();
-
+ 
     if (!user) {
-      return NextResponse.json({ authenticated: false }, { status: 401 });
+      return NextResponse.json({ authenticated: false, reason: 'user_not_found' }, { status: 401 });
     }
 
     return NextResponse.json({
