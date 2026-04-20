@@ -26,8 +26,11 @@ export default function Navbar() {
         .then(r => r.json())
         .then(d => {
           if (d.authenticated && d.user) {
-            // Restore session including token if returned, or maintain existing
-            dispatch(loginSuccess({ user: d.user, token: d.token || reduxToken }));
+            // Passive restore: Keep existing token if server doesn't provide one
+            dispatch(loginSuccess({ 
+              user: d.user, 
+              token: d.token || reduxToken 
+            }));
           }
           setSessionLoading(false);
         })

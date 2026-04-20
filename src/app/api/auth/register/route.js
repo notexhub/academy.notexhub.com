@@ -35,10 +35,10 @@ export async function POST(request) {
       }
     }, { status: 201 });
 
-    // Definitive Cookie Setting for Vercel
+    // Official Next.js way to set the cookie in a Route Handler
     response.cookies.set('notex_session', token, {
       httpOnly: true,
-      secure: true, // Always true for Vercel HTTPS
+      secure: true,
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 30, // 30 days
       path: '/',

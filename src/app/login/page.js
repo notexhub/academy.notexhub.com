@@ -30,14 +30,7 @@ function LoginContent() {
         // 1. Sync Redux
         dispatch(loginSuccess({ user: data.user, token: data.token }));
         
-        // 2. Client-side cookie fallback (Ensures cookie is saved even if header fails)
-        if (typeof document !== 'undefined') {
-          const expiration = new Date();
-          expiration.setTime(expiration.getTime() + (30 * 24 * 60 * 60 * 1000)); // 30 days
-          document.cookie = `notex_session=${data.token}; path=/; expires=${expiration.toUTCString()}; SameSite=Lax; Secure`;
-        }
-        
-        // 3. Small delay to ensure cookie is processed by browser
+        // 2. Small delay to ensure cookie is processed by browser
         setTimeout(() => {
           if (redirect) window.location.href = redirect;
           else window.location.href = data.user?.role === 'admin' ? '/admin' : '/dashboard';
