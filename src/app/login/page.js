@@ -24,8 +24,11 @@ function LoginContent() {
       const data = await res.json();
       if (res.ok) {
         dispatch(loginSuccess({ user: data.user, token: data.token }));
-        if (redirect) window.location.href = redirect;
-        else window.location.href = data.role === 'admin' ? '/admin' : '/dashboard';
+        // Give redux-persist 150ms to flush state to localStorage before navigation
+        setTimeout(() => {
+          if (redirect) window.location.href = redirect;
+          else window.location.href = data.user?.role === 'admin' ? '/admin' : '/dashboard';
+        }, 150);
       }
       else setError(data.error || 'লগইন ব্যর্থ হয়েছে');
     } catch { setError('নেটওয়ার্ক সমস্যা হয়েছে'); }
