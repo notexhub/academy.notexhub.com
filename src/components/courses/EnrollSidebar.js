@@ -23,10 +23,13 @@ export default function EnrollSidebar({ course, user: serverUser }) {
 
   useEffect(() => {
     if (!user) { setCheckingEnroll(false); return; }
+    
+    const headers = {};
+    if (reduxUser?.token) headers['Authorization'] = `Bearer ${reduxUser.token}`;
+
     fetch(`/api/user/enroll?courseId=${id}`, {
-      headers: {
-        'Authorization': `Bearer ${reduxUser?.token || ''}`
-      }
+      headers,
+      credentials: 'include'
     })
       .then(r => r.json())
       .then(d => { setEnrolled(d.enrolled); setCheckingEnroll(false); })
@@ -38,12 +41,13 @@ export default function EnrollSidebar({ course, user: serverUser }) {
     setEnrolling(true);
     setStatusMsg('এনরোলমেন্ট প্রসেস হচ্ছে...');
     try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (reduxUser?.token) headers['Authorization'] = `Bearer ${reduxUser.token}`;
+
       const res = await fetch('/api/user/enroll', {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${reduxUser?.token || ''}`
-        },
+        headers,
+        credentials: 'include',
         body: JSON.stringify({ courseId: id }),
       });
       const data = await res.json();
