@@ -12,7 +12,7 @@ import DashboardClient from './DashboardClient';
 export const dynamic = 'force-dynamic';
 
 export default async function Dashboard() {
-  const token = cookies().get('auth_token')?.value;
+  const token = cookies().get('notex_session')?.value;
   if (!token) redirect('/login');
   const userTk = await verifyToken(token).catch(() => null);
   if (!userTk) redirect('/login');

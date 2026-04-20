@@ -7,7 +7,7 @@ import { cookies } from 'next/headers';
 
 export async function POST(req) {
   try {
-    const token = cookies().get('auth_token')?.value;
+    const token = cookies().get('notex_session')?.value;
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     const decoded = await verifyToken(token);
     if (!decoded) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -38,7 +38,7 @@ export async function POST(req) {
 
 export async function GET(req) {
   try {
-    const token = cookies().get('auth_token')?.value;
+    const token = cookies().get('notex_session')?.value;
     if (!token) return NextResponse.json({ enrolled: false });
     const decoded = await verifyToken(token).catch(() => null);
     if (!decoded) return NextResponse.json({ enrolled: false });

@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 // GET all requests for admin
 export async function GET() {
   try {
-    const token = cookies().get('auth_token')?.value;
+    const token = cookies().get('notex_session')?.value;
     if (!token) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
     const payload = await verifyToken(token);
@@ -34,7 +34,7 @@ export async function GET() {
 // PATCH approve/reject request
 export async function PATCH(request) {
   try {
-    const token = cookies().get('auth_token')?.value;
+    const token = cookies().get('notex_session')?.value;
     if (!token) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
     const payload = await verifyToken(token);

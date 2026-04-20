@@ -5,7 +5,7 @@ import { verifyToken } from '@/lib/jwt';
 import { cookies } from 'next/headers';
 
 async function authAdmin() {
-  const token = cookies().get('auth_token')?.value;
+  const token = cookies().get('notex_session')?.value;
   if (!token) throw new Error('Unauthorized');
   const user = await verifyToken(token);
   if (!user || user.role !== 'admin') throw new Error('Forbidden');

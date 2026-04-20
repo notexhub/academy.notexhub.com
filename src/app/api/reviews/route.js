@@ -25,7 +25,7 @@ export async function GET(req) {
 
 export async function POST(req) {
   try {
-    const token = cookies().get('auth_token')?.value;
+    const token = cookies().get('notex_session')?.value;
     const decoded = await verifyToken(token);
     if (!decoded) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 

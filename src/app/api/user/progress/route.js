@@ -6,7 +6,7 @@ import { cookies } from 'next/headers';
 
 export async function POST(req) {
   try {
-    const t = cookies().get('auth_token')?.value;
+    const t = cookies().get('notex_session')?.value;
     if (!t) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     const user = await verifyToken(t);
     

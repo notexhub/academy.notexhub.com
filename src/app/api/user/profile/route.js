@@ -6,7 +6,7 @@ import { cookies } from 'next/headers';
 import bcrypt from 'bcryptjs';
 
 async function getUser() {
-  const token = cookies().get('auth_token')?.value;
+  const token = cookies().get('notex_session')?.value;
   if (!token) throw new Error('Unauthorized');
   const decoded = await verifyToken(token);
   if (!decoded) throw new Error('Unauthorized');

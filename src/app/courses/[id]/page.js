@@ -20,7 +20,7 @@ export default async function CourseDetailPage({ params }) {
   const raw = await Course.findById(params.id).lean();
   if (!raw) return <div>Course not found</div>;
   const course = JSON.parse(JSON.stringify(raw));
-  const token = cookies().get('auth_token')?.value;
+  const token = cookies().get('notex_session')?.value;
   const decoded = token ? await verifyToken(token).catch(() => null) : null;
 
   // Get full user with subscription info from DB

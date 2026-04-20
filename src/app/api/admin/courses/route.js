@@ -5,7 +5,7 @@ import { verifyToken } from '@/lib/jwt';
 import { cookies } from 'next/headers';
 
 async function guard() {
-  const t = cookies().get('auth_token')?.value;
+  const t = cookies().get('notex_session')?.value;
   if (!t) throw new Error('Unauthorized');
   const u = await verifyToken(t);
   if (!u || u.role !== 'admin') throw new Error('Forbidden');

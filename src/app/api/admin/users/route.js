@@ -9,7 +9,7 @@ import bcrypt from 'bcryptjs';
 export const dynamic = 'force-dynamic';
 
 async function verifyAdmin() {
-  const token = cookies().get('auth_token')?.value;
+  const token = cookies().get('notex_session')?.value;
   if (!token) return { error: 'Unauthorized', status: 401 };
   
   const payload = await verifyToken(token);

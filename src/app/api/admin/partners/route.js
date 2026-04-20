@@ -12,7 +12,7 @@ export async function GET() {
 
 export async function POST(req) {
   try {
-    const t = cookies().get('auth_token')?.value;
+    const t = cookies().get('notex_session')?.value;
     const ut = await verifyToken(t);
     if (!ut || ut.role !== 'admin') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     
@@ -25,7 +25,7 @@ export async function POST(req) {
 
 export async function DELETE(req) {
   try {
-    const t = cookies().get('auth_token')?.value;
+    const t = cookies().get('notex_session')?.value;
     const ut = await verifyToken(t);
     if (!ut || ut.role !== 'admin') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     

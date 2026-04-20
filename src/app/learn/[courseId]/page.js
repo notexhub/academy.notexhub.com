@@ -10,7 +10,7 @@ import { redirect } from 'next/navigation';
 export const dynamic = 'force-dynamic';
 
 export default async function LearnPage({ params }) {
-  const token = cookies().get('auth_token')?.value;
+  const token = cookies().get('notex_session')?.value;
   if (!token) redirect('/login');
 
   const userTk = await verifyToken(token).catch(() => null);

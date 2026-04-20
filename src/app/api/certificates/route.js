@@ -8,7 +8,7 @@ import { cookies } from 'next/headers';
 
 export async function POST(req) {
   try {
-    const token = cookies().get('auth_token')?.value;
+    const token = cookies().get('notex_session')?.value;
     if (!token) return NextResponse.json({ error: 'লগইন করা নেই। আবার লগইন করুন।' }, { status: 401 });
 
     const payload = await verifyToken(token);
