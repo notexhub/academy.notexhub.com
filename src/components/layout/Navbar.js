@@ -21,13 +21,12 @@ export default function Navbar() {
   useEffect(() => {
     // If not authenticated in Redux, try to fetch from session cookie
     if (!isAuthenticated) {
+      setSessionLoading(true);
       fetch('/api/auth/me')
         .then(r => r.json())
         .then(d => {
           if (d.authenticated && d.user) {
-            import('@/redux/slices/authSlice').then(m => {
-              dispatch(m.loginSuccess({ user: d.user, token: null })); // token might be on server only
-            });
+            dispatch(loginSuccess({ user: d.user, token: null }));
           }
           setSessionLoading(false);
         })

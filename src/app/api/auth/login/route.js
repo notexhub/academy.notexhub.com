@@ -9,16 +9,16 @@ export async function POST(request) {
     const { email, password } = await request.json();
     await dbConnect();
     const user = await User.findOne({ email });
-    if (!user) return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
-    if (user.blocked) return NextResponse.json({ error: 'Your account is blocked.' }, { status: 403 });
+    if (!user) return NextResponse.json({ error: 'ইমেইল বা পাসওয়ার্ড ভুল হয়েছে' }, { status: 401 });
+    if (user.blocked) return NextResponse.json({ error: 'আপনার অ্যাকাউন্ট ব্লক করা হয়েছে' }, { status: 403 });
 
     const isValid = await bcrypt.compare(password, user.password);
-    if (!isValid) return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+    if (!isValid) return NextResponse.json({ error: 'ইমেইল বা পাসওয়ার্ড ভুল হয়েছে' }, { status: 401 });
 
     const token = await signToken({ userId: user._id.toString(), role: user.role });
 
     const response = NextResponse.json({
-      message: 'Logged in successfully',
+      message: 'লগইন সফল হয়েছে',
       role: user.role,
       token,
       user: {
@@ -34,10 +34,10 @@ export async function POST(request) {
       }
     }, { status: 200 });
 
-    // Set cookie for server-side auth (dashboard/admin pages)
+    // Definitive Cookie Setting for Vercel
     response.cookies.set('notex_session', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: true, // Always true for Vercel HTTPS
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 30, // 30 days
       path: '/',
@@ -45,6 +45,6 @@ export async function POST(request) {
 
     return response;
   } catch (err) {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return NextResponse.json({ error: 'সার্ভার সমস্যা হয়েছে' }, { status: 500 });
   }
 }

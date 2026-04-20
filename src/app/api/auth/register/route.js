@@ -9,7 +9,7 @@ export async function POST(request) {
     const { name, email, password } = await request.json();
     await dbConnect();
     const existingUser = await User.findOne({ email });
-    if (existingUser) return NextResponse.json({ error: 'User already exists' }, { status: 400 });
+    if (existingUser) return NextResponse.json({ error: 'এই ইমেইলে আগেই অ্যাকাউন্ট আছে' }, { status: 400 });
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const count = await User.countDocuments();
@@ -19,7 +19,7 @@ export async function POST(request) {
     const token = await signToken({ userId: user._id.toString(), role: user.role });
 
     const response = NextResponse.json({
-      message: 'User created successfully',
+      message: 'রেজিস্ট্রেশন সফল হয়েছে',
       role: user.role,
       token,
       user: {
@@ -35,10 +35,10 @@ export async function POST(request) {
       }
     }, { status: 201 });
 
-    // Set cookie for server-side auth (dashboard/admin pages)
+    // Definitive Cookie Setting for Vercel
     response.cookies.set('notex_session', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: true, // Always true for Vercel HTTPS
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 30, // 30 days
       path: '/',
@@ -46,6 +46,6 @@ export async function POST(request) {
 
     return response;
   } catch (err) {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return NextResponse.json({ error: 'সার্ভার সমস্যা হয়েছে' }, { status: 500 });
   }
 }
