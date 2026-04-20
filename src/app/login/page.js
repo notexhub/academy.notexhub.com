@@ -1,39 +1,25 @@
 'use client';
-import { useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle2 } from 'lucide-react';
 import { Suspense } from 'react';
-import { loginSuccess } from '@/redux/slices/authSlice';
-import { useDispatch } from 'react-redux';
+import { useFormState, useFormStatus } from 'react-dom';
+import { loginAction } from '@/app/actions/auth';
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button type="submit" className="btn btn-navy btn-block btn-lg" style={{ marginTop: '0.5rem' }} disabled={pending}>
+      {pending ? 'লগ ইন হচ্ছে...' : 'লগ ইন করুন'}
+    </button>
+  );
+}
 
 function LoginContent() {
-  const [form, setForm] = useState({ email: '', password: '' });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
-  const dispatch = useDispatch();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get('redirect');
-
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true); setError('');
-    try {
-      const res = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
-      const data = await res.json();
-      if (res.ok) {
-        dispatch(loginSuccess({ user: data.user, token: data.token }));
-        // Give redux-persist 150ms to flush state to localStorage before navigation
-        setTimeout(() => {
-          if (redirect) window.location.href = redirect;
-          else window.location.href = data.user?.role === 'admin' ? '/admin' : '/dashboard';
-        }, 150);
-      }
-      else setError(data.error || 'লগইন ব্যর্থ হয়েছে');
-    } catch { setError('নেটওয়ার্ক সমস্যা হয়েছে'); }
-    setLoading(false);
-  };
+  const redirect = searchParams.get('redirect') || '';
+  const [state, formAction] = useFormState(loginAction, { error: null });
 
   const benefits = [
     { text: 'বিশেষজ্ঞ ইন্সট্রাক্টর' },
@@ -69,19 +55,18 @@ function LoginContent() {
         <div style={{ width: '100%', maxWidth: 400 }}>
           <h1 style={{ fontSize: 'var(--text-3xl)', fontWeight: 800, marginBottom: '0.5rem' }}>স্বাগত ফিরে আসায়</h1>
           <p style={{ color: 'var(--gray-500)', marginBottom: '2rem', fontSize: 'var(--text-sm)' }}>আপনার অ্যাকাউন্টে লগ ইন করুন</p>
-          {error && <div className="alert alert-error">{error}</div>}
-          <form onSubmit={onSubmit}>
+          {state?.error && <div className="alert alert-error">{state.error}</div>}
+          <form action={formAction}>
+            <input type="hidden" name="redirect" value={redirect} />
             <div className="form-group">
               <label className="form-label">ইমেইল অ্যাড্রেস</label>
-              <input type="email" className="form-input" placeholder="your@email.com" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required />
+              <input type="email" name="email" className="form-input" placeholder="your@email.com" required />
             </div>
             <div className="form-group">
               <label className="form-label">পাসওয়ার্ড</label>
-              <input type="password" className="form-input" placeholder="আপনার পাসওয়ার্ড" value={form.password} onChange={e => setForm({...form, password: e.target.value})} required />
+              <input type="password" name="password" className="form-input" placeholder="আপনার পাসওয়ার্ড" required />
             </div>
-            <button type="submit" className="btn btn-navy btn-block btn-lg" style={{ marginTop: '0.5rem' }} disabled={loading}>
-              {loading ? '...' : 'লগ ইন করুন'}
-            </button>
+            <SubmitButton />
           </form>
           <p style={{ textAlign: 'center', color: 'var(--gray-500)', marginTop: '1.5rem', fontSize: 'var(--text-sm)' }}>
             অ্যাকাউন্ট নেই? <Link href={redirect ? `/register?redirect=${encodeURIComponent(redirect)}` : "/register"} style={{ color: 'var(--navy)', fontWeight: 700 }}>বিনামূল্যে রেজিস্ট্রেশন করুন</Link>

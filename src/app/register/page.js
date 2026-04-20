@@ -1,40 +1,24 @@
 'use client';
 import { useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Suspense } from 'react';
-import { useDispatch } from 'react-redux';
-import { loginSuccess } from '@/redux/slices/authSlice';
+import { useFormState, useFormStatus } from 'react-dom';
+import { registerAction } from '@/app/actions/auth';
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button type="submit" className="btn btn-lime btn-block btn-lg" disabled={pending}>
+      {pending ? 'অ্যাকাউন্ট তৈরি হচ্ছে...' : 'অ্যাকাউন্ট তৈরি করুন →'}
+    </button>
+  );
+}
 
 function RegisterContent() {
-  const [form, setForm] = useState({ name: '', email: '', password: '' });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
-  const dispatch = useDispatch();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get('redirect');
-
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true); setError('');
-    try {
-      const res = await fetch('/api/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
-      const data = await res.json();
-      if (res.ok) {
-        dispatch(loginSuccess({ user: data.user, token: data.token }));
-        // Give redux-persist 150ms to flush state to localStorage before navigation
-        setTimeout(() => {
-          if (redirect) window.location.href = redirect;
-          else window.location.href = data.user?.role === 'admin' ? '/admin' : '/dashboard';
-        }, 150);
-      }
-      else setError(data.error || 'রেজিস্ট্রেশন সম্পন্ন হয়নি');
-    } catch { setError('নেটওয়ার্ক সমস্যা হয়েছে'); }
-    setLoading(false);
-  };
-
-  const f = (k) => (e) => setForm({...form, [k]: e.target.value});
+  const redirect = searchParams.get('redirect') || '';
+  const [state, formAction] = useFormState(registerAction, { error: null });
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--gray-50)', display: 'flex' }}>
@@ -62,23 +46,22 @@ function RegisterContent() {
         <div style={{ width: '100%', maxWidth: 400 }}>
           <h1 style={{ fontSize: 'var(--text-3xl)', fontWeight: 800, marginBottom: '0.5rem' }}>নতুন অ্যাকাউন্ট খুলুন</h1>
           <p style={{ color: 'var(--gray-500)', marginBottom: '2rem', fontSize: 'var(--text-sm)' }}>সম্পূর্ণ বিনামূল্যে — কোনো ক্রেডিট কার্ড লাগবে না</p>
-          {error && <div className="alert alert-error">{error}</div>}
-          <form onSubmit={onSubmit}>
+          {state?.error && <div className="alert alert-error">{state.error}</div>}
+          <form action={formAction}>
+            <input type="hidden" name="redirect" value={redirect} />
             <div className="form-group">
               <label className="form-label">পূর্ণ নাম</label>
-              <input type="text" className="form-input" placeholder="আপনার নাম লিখুন" value={form.name} onChange={f('name')} required />
+              <input type="text" name="name" className="form-input" placeholder="আপনার নাম লিখুন" required />
             </div>
             <div className="form-group">
               <label className="form-label">ইমেইল অ্যাড্রেস</label>
-              <input type="email" className="form-input" placeholder="your@email.com" value={form.email} onChange={f('email')} required />
+              <input type="email" name="email" className="form-input" placeholder="your@email.com" required />
             </div>
             <div className="form-group">
               <label className="form-label">পাসওয়ার্ড</label>
-              <input type="password" className="form-input" placeholder="কমপক্ষে ৬ অক্ষর" value={form.password} onChange={f('password')} minLength={6} required />
+              <input type="password" name="password" className="form-input" placeholder="কমপক্ষে ৬ অক্ষর" minLength={6} required />
             </div>
-            <button type="submit" className="btn btn-lime btn-block btn-lg" disabled={loading}>
-              {loading ? '...' : 'অ্যাকাউন্ট তৈরি করুন →'}
-            </button>
+            <SubmitButton />
           </form>
           <p style={{ textAlign: 'center', color: 'var(--gray-400)', marginTop: '1rem', fontSize: 'var(--text-xs)', lineHeight: 1.7 }}>
             রেজিস্ট্রেশন করলে আমাদের <Link href="/terms" style={{ color: 'var(--navy)' }}>Terms of Service</Link> এবং <Link href="/privacy" style={{ color: 'var(--navy)' }}>Privacy Policy</Link> মেনে নিচ্ছেন।

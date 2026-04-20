@@ -14,10 +14,28 @@ export default function Navbar() {
   const router = useRouter();
   const dispatch = useDispatch();
   
-  const { user, isAuthenticated, loading: authLoading } = useSelector((state) => state.auth);
+  const { user, isAuthenticated, loading: authLoadingState } = useSelector((state) => state.auth);
   const [logoData, setLogoData] = useState(null);
+  const [sessionLoading, setSessionLoading] = useState(!isAuthenticated);
 
   useEffect(() => {
+    // If not authenticated in Redux, try to fetch from session cookie
+    if (!isAuthenticated) {
+      fetch('/api/auth/me')
+        .then(r => r.json())
+        .then(d => {
+          if (d.authenticated && d.user) {
+            import('@/redux/slices/authSlice').then(m => {
+              dispatch(m.loginSuccess({ user: d.user, token: null })); // token might be on server only
+            });
+          }
+          setSessionLoading(false);
+        })
+        .catch(() => setSessionLoading(false));
+    } else {
+      setSessionLoading(false);
+    }
+
     fetch('/api/settings')
       .then(r => r.json())
       .then(d => {
@@ -26,7 +44,9 @@ export default function Navbar() {
         }
       })
       .catch(() => {});
-  }, []);
+  }, [isAuthenticated, dispatch]);
+
+  const authLoading = authLoadingState || sessionLoading;
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 10);
