@@ -1,12 +1,15 @@
 import dbConnect from '@/lib/mongodb';
 import Course from '@/models/Course';
 import User from '@/models/User';
+import Enrollment from '@/models/Enrollment';
+import Review from '@/models/Review';
 import { verifyToken } from '@/lib/jwt';
 import { cookies } from 'next/headers';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import EnrollSidebar from '@/components/courses/EnrollSidebar';
 import SyllabusAccordion from '@/components/courses/SyllabusAccordion';
+import ReviewForm from '@/components/reviews/ReviewForm';
 import Link from 'next/link';
 import { Star, Users, Video, Calendar, CheckCircle2, GraduationCap, ArrowRight } from 'lucide-react';
 
@@ -29,6 +32,17 @@ export default async function CourseDetailPage({ params }) {
     }
   }
 
+  // Real-time Stats
+  const enrollmentCount = await Enrollment.countDocuments({ courseId: params.id });
+  const courseReviews = await Review.find({ courseId: params.id, status: 'approved' }).lean();
+  const totalReviews = courseReviews.length;
+  const avgRating = totalReviews > 0 
+    ? (courseReviews.reduce((acc, r) => acc + (r.rating || 5), 0) / totalReviews).toFixed(1)
+    : '5.0';
+  const displayStudentCount = enrollmentCount > 0 ? `${enrollmentCount.toLocaleString()}+ শিক্ষার্থী` : 'নতুন কোর্স';
+  
+  const isEnrolled = decoded ? (await Enrollment.exists({ userId: decoded.userId, courseId: params.id })) : false;
+
   const learns = course.whatYouLearn || ['হাতে–কলমে প্রজেক্ট বানাবেন', 'ইন্ডাস্ট্রি স্ট্যান্ডার্ড কোড লিখবেন', 'ফ্রিল্যান্সিং শুরু করতে পারবেন', 'লাইভ ডিপ্লয়মেন্ট করতে পারবেন', 'ব্যবহারকারীর চাহিদা অনুযায়ী ডিজাইন করবেন', 'সিভি ও পোর্টফোলিও তৈরি করবেন'];
 
   return (
@@ -43,11 +57,11 @@ export default async function CourseDetailPage({ params }) {
               <span style={{ color: '#4b5563' }}>→</span>
               <span style={{ color: '#94a3b8', fontSize: 'var(--text-sm)' }}>{course.category || 'Development'}</span>
             </div>
-            <h1 style={{ fontSize: '2.4rem', fontWeight: 800, lineHeight: 1.25, marginBottom: '1rem' }}>{course.title}</h1>
+            <h1 style={{ fontSize: '2.4rem', fontWeight: 800, lineHeight: 1.25, marginBottom: '1rem', color: '#ffffff' }}>{course.title}</h1>
             <p style={{ color: '#cbd5e1', fontSize: 'var(--text-lg)', lineHeight: 1.7, marginBottom: '1.5rem' }}>{course.description}</p>
             <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', fontSize: 'var(--text-sm)', color: '#94a3b8', alignItems: 'center' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Star size={14} style={{ color: '#fbbf24', fill: '#fbbf24' }} /> <strong style={{ color: '#fbbf24' }}>5.0</strong> (৫৪৮ রিভিউ)</span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Users size={14} /> ২,৫০০+ শিক্ষার্থী</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Star size={14} style={{ color: '#fbbf24', fill: '#fbbf24' }} /> <strong style={{ color: '#fbbf24' }}>{avgRating}</strong> ({totalReviews} রিভিউ)</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Users size={14} /> {displayStudentCount}</span>
               <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Video size={14} /> {course.modules?.length || 0} টি লেকচার</span>
               <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Calendar size={14} /> সর্বশেষ আপডেট: ২০২৫</span>
               <span className={`badge ${course.isFree ? 'badge-free' : 'badge-premium'}`}>{course.isFree ? 'বিনামূল্যে' : 'প্রিমিয়াম'}</span>
@@ -85,20 +99,57 @@ export default async function CourseDetailPage({ params }) {
             <SyllabusAccordion modules={course.modules || []} />
           </section>
 
-          {/* Instructor */}
-          <section id="instructor" style={{ background: 'white', border: '1px solid var(--gray-200)', borderRadius: 'var(--radius-lg)', padding: '2rem' }}>
-            <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 800, marginBottom: '1.5rem' }}>ইন্সট্রাক্টর পরিচিতি</h2>
-            <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
-              <div className="w-16 h-16 rounded-2xl bg-[#0f172a] text-[#CCFF00] flex items-center justify-center flex-shrink-0 shadow-lg" style={{ fontSize: '1.5rem' }}>
-                <GraduationCap size={32} />
+          {/* Instructor and Reviews */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <section id="instructor" style={{ background: 'white', border: '1px solid var(--gray-200)', borderRadius: 'var(--radius-lg)', padding: '2rem' }}>
+              <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 800, marginBottom: '1.5rem' }}>ইন্সট্রাক্টর পরিচিতি</h2>
+              <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
+                <div className="w-16 h-16 rounded-2xl bg-[#0f172a] text-[#CCFF00] flex items-center justify-center flex-shrink-0 shadow-lg overflow-hidden" style={{ fontSize: '1.5rem' }}>
+                  {course.instructor?.image ? (
+                    <img src={course.instructor.image} alt={course.instructor.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <GraduationCap size={32} />
+                  )}
+                </div>
+                <div>
+                  <h3 style={{ fontWeight: 700, marginBottom: '0.25rem' }}>{course.instructor?.name || 'NotexHub Expert Team'}</h3>
+                  <p style={{ color: '#5a7a00', fontSize: 'var(--text-sm)', fontWeight: 600, marginBottom: '0.75rem' }}>{course.instructor?.designation || 'সিনিয়র ইন্সট্রাক্টর ও মেন্টর'}</p>
+                  <p style={{ color: 'var(--gray-600)', fontSize: 'var(--text-sm)', lineHeight: 1.7 }}>
+                    {course.instructor?.description || 'অভিজ্ঞ ইন্ডাস্ট্রি মেন্টর। ১০+ বছরের বাস্তব অভিজ্ঞতা নিয়ে শিক্ষার্থীদের ক্যারিয়ার গড়তে সাহায্য করছেন।'}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 style={{ fontWeight: 700, marginBottom: '0.25rem' }}>NotexHub Expert Team</h3>
-                <p style={{ color: '#5a7a00', fontSize: 'var(--text-sm)', fontWeight: 600, marginBottom: '0.75rem' }}>সিনিয়র ইন্সট্রাক্টর ও মেন্টর</p>
-                <p style={{ color: 'var(--gray-600)', fontSize: 'var(--text-sm)', lineHeight: 1.7 }}>অভিজ্ঞ ইন্ডাস্ট্রি মেন্টর। ১০+ বছরের বাস্তব অভিজ্ঞতা নিয়ে শিক্ষার্থীদের ক্যারিয়ার গড়তে সাহায্য করছেন।</p>
+            </section>
+
+            {/* User Reviews */}
+            <section id="reviews" style={{ borderTop: '1px solid var(--gray-200)', paddingTop: '2rem' }}>
+              <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 800, marginBottom: '1.5rem' }}>শিক্ষার্থীদের রিভিউ ({totalReviews})</h2>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '3rem' }}>
+                {courseReviews.length === 0 ? (
+                  <p style={{ color: 'var(--gray-500)', fontSize: 14 }}>এখনও কোনো রিভিউ নেই।</p>
+                ) : courseReviews.map((r, i) => (
+                  <div key={r._id} style={{ background: 'white', border: '1px solid #f1f5f9', borderRadius: 16, padding: '1.5rem', display: 'flex', gap: '1.25rem' }}>
+                    <div style={{ width: 40, height: 40, borderRadius: '50%', background: `hsl(${i * 137}, 60%, 40%)`, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, flexShrink: 0 }}>
+                      {r.studentName?.[0]}
+                    </div>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                        <span style={{ fontWeight: 700, fontSize: 14 }}>{r.studentName}</span>
+                        <div style={{ display: 'flex', gap: 2 }}>
+                          {[...Array(5)].map((_, j) => <Star key={j} size={10} style={{ color: j < (r.rating || 5) ? '#fbbf24' : '#e5e7eb', fill: j < (r.rating || 5) ? '#fbbf24' : 'none' }} />)}
+                        </div>
+                      </div>
+                      <p style={{ fontSize: 13, color: 'var(--gray-600)', lineHeight: 1.6 }}>&ldquo;{r.quote}&rdquo;</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-          </section>
+
+              {/* Review Form */}
+              <ReviewForm courseId={params.id} isEnrolled={!!isEnrolled} />
+            </section>
+          </div>
         </div>
 
         {/* Sidebar */}

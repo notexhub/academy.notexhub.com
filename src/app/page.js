@@ -53,7 +53,7 @@ export default async function Home() {
     await dbConnect();
     const [rawCourses, rawReviews, rawPartners, rawCats] = await Promise.all([
       Course.find({ isActive: true }).limit(6).lean(),
-      Review.find({}).limit(4).lean(),
+      Review.find({ status: 'approved' }).sort({ createdAt: -1 }).limit(4).lean(),
       Partner.find({}).limit(8).lean(),
       Category.find({ isActive: true }).limit(6).lean(),
     ]);

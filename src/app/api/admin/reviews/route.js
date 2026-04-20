@@ -18,7 +18,22 @@ export async function POST(req) {
     
     await dbConnect();
     const data = await req.json();
-    const r = await Review.create(data);
+    const r = await Review.create({ ...data, status: 'approved' }); // Admin added are approved by default
+    return NextResponse.json(r);
+  } catch (err) { return NextResponse.json({ error: 'Error' }, { status: 500 }); }
+}
+
+export async function PATCH(req) {
+  try {
+    const t = cookies().get('auth_token')?.value;
+    const ut = await verifyToken(t);
+    if (!ut || ut.role !== 'admin') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    
+    await dbConnect();
+    const { id, status } = await req.json();
+    if (!id || !status) return NextResponse.json({ error: 'Missing id or status' }, { status: 400 });
+
+    const r = await Review.findByIdAndUpdate(id, { status }, { new: true });
     return NextResponse.json(r);
   } catch (err) { return NextResponse.json({ error: 'Error' }, { status: 500 }); }
 }

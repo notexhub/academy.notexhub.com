@@ -1,8 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, ImageIcon, ChevronRight, ChevronLeft, CheckCircle2, BookOpen, DollarSign, Video, FileText, UploadCloud, Lock, Loader2, Save } from 'lucide-react';
+import { Plus, Trash2, ImageIcon, ChevronRight, ChevronLeft, CheckCircle2, BookOpen, DollarSign, Video, FileText, UploadCloud, Lock, Loader2, Save, GraduationCap, User } from 'lucide-react';
 
-const EMPTY = { title: '', description: '', category: '', isFree: false, isActive: true, price: 1500, bannerBase64: '', subscriptionOnly: false, whatYouLearn: [''], modules: [], resources: [] };
+const EMPTY = { title: '', description: '', category: '', isFree: false, isActive: true, price: 1500, bannerBase64: '', subscriptionOnly: false, whatYouLearn: [''], modules: [], resources: [], instructor: { name: '', designation: '', description: '', image: '' } };
 
 const inp = { width: '100%', padding: '0.65rem 0.9rem', border: '1.5px solid #e2e8f0', borderRadius: 10, fontSize: 14, fontFamily: 'inherit', outline: 'none', color: '#0f172a', background: '#fff', transition: 'border-color 0.15s, box-shadow 0.15s' };
 const focus = { borderColor: '#CCFF00', boxShadow: '0 0 0 3px rgba(204,255,0,0.15)' };
@@ -12,7 +12,8 @@ const STEPS = [
   { id: 0, label: 'মূল তথ্য', icon: BookOpen },
   { id: 1, label: 'মডিউল', icon: Video },
   { id: 2, label: 'রিসোর্স', icon: FileText },
-  { id: 3, label: 'মূল্য ও অ্যাক্সেস', icon: DollarSign },
+  { id: 3, label: 'ইন্সট্রাক্টর', icon: GraduationCap },
+  { id: 4, label: 'মূল্য ও অ্যাক্সেস', icon: DollarSign },
 ];
 
 function Toggle({ checked, onChange, label }) {
@@ -47,6 +48,11 @@ export default function CourseFormFields({ initial = EMPTY, onSave, onCancel, lo
   const handleBanner = (e) => {
     const file = e.target.files[0]; if (!file) return;
     const r = new FileReader(); r.onload = ev => set('bannerBase64', ev.target.result); r.readAsDataURL(file);
+  };
+  const setInst = (k, v) => setForm(f => ({ ...f, instructor: { ...f.instructor, [k]: v } }));
+  const handleInstImg = (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    const r = new FileReader(); r.onload = ev => setInst('image', ev.target.result); r.readAsDataURL(file);
   };
 
   const addMod = () => set('modules', [...form.modules, { title: '', youtubeUrl: '', duration: '' }]);
@@ -214,8 +220,45 @@ export default function CourseFormFields({ initial = EMPTY, onSave, onCancel, lo
         </div>
       )}
 
-      {/* Step 3: Pricing & Access */}
+      {/* Step 3: Instructor Information */}
       {step === 3 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ display: 'flex', gap: 16, alignItems: 'center', padding: 16, background: '#f8fafc', borderRadius: 14, border: '1px solid #f1f5f9' }}>
+            <div style={{ position: 'relative', width: 80, height: 80, borderRadius: 16, background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '2px solid #fff', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+              {form.instructor.image ? <img src={form.instructor.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <User size={32} style={{ color: '#94a3b8' }} />}
+              <label style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={e => e.currentTarget.style.opacity = 1} onMouseLeave={e => e.currentTarget.style.opacity = 0}>
+                <UploadCloud size={20} style={{ color: 'white' }} />
+                <input type="file" accept="image/*" onChange={handleInstImg} style={{ display: 'none' }} />
+              </label>
+            </div>
+            <div>
+              <p style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>পাবলিক প্রোফাইল ফটো</p>
+              <p style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>ইন্সট্রাক্টরের স্পষ্ট ছবি আপলোড করুন</p>
+              <label style={{ display: 'inline-block', marginTop: 8, fontSize: 12, fontWeight: 700, color: '#0f172a', background: '#CCFF00', padding: '4px 12px', borderRadius: 6, cursor: 'pointer' }}>
+                ছবি বাছুন
+                <input type="file" accept="image/*" onChange={handleInstImg} style={{ display: 'none' }} />
+              </label>
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div>
+              <label style={lbl}>নাম *</label>
+              <input style={inpStyle('iname')} value={form.instructor.name} onChange={e => setInst('name', e.target.value)} placeholder="যেমন: রাকিবুল ইসলাম" onFocus={() => setFocused('iname')} onBlur={() => setFocused('')} />
+            </div>
+            <div>
+              <label style={lbl}>ডেজিগনেশন *</label>
+              <input style={inpStyle('idesig')} value={form.instructor.designation} onChange={e => setInst('designation', e.target.value)} placeholder="যেমন: সিইও ও ইন্সট্রাক্টর" onFocus={() => setFocused('idesig')} onBlur={() => setFocused('')} />
+            </div>
+          </div>
+          <div>
+            <label style={lbl}>সংক্ষিপ্ত জীবনী (Bio)</label>
+            <textarea style={{ ...inpStyle('ibio'), minHeight: 120, resize: 'vertical' }} value={form.instructor.description} onChange={e => setInst('description', e.target.value)} placeholder="ইন্সট্রাক্টর সম্পর্কে বিস্তারিত লিখুন যা কোর্স পেজে প্রদর্শিত হবে..." onFocus={() => setFocused('ibio')} onBlur={() => setFocused('')} />
+          </div>
+        </div>
+      )}
+
+      {/* Step 4: Pricing & Access */}
+      {step === 4 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div style={{ padding: 20, background: '#f8fafc', borderRadius: 14, display: 'flex', flexDirection: 'column', gap: 14, border: '1px solid #f1f5f9' }}>
             <h4 style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
