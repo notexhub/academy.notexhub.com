@@ -3,6 +3,7 @@ import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 import bcrypt from 'bcryptjs';
 import { signToken } from '@/lib/jwt';
+import { cookies } from 'next/headers';
 
 export async function POST(request) {
   try {
