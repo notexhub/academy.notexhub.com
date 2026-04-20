@@ -22,7 +22,7 @@ export async function POST(request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 86400, // 1 day
+      maxAge: 604800, // 7 days
       path: '/',
     });
 

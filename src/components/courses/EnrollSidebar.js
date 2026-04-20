@@ -24,7 +24,7 @@ export default function EnrollSidebar({ course, user }) {
   }, [id, user]);
 
   const handleEnroll = async () => {
-    if (!user) { router.push('/login'); return; }
+    if (!user) { router.push(`/login?redirect=${encodeURIComponent(`/courses/${id}`)}`); return; }
     setEnrolling(true);
     try {
       const res = await fetch('/api/user/enroll', {
@@ -73,7 +73,7 @@ export default function EnrollSidebar({ course, user }) {
     if (isFree) {
       if (!user) {
         return (
-          <Link href="/login" className="btn btn-navy btn-block btn-lg" style={{ marginBottom: '0.75rem' }}>
+          <Link href={`/login?redirect=${encodeURIComponent(`/courses/${id}`)}`} className="btn btn-navy btn-block btn-lg" style={{ marginBottom: '0.75rem' }}>
             লগ ইন করে এনরোল করুন
           </Link>
         );
@@ -101,7 +101,7 @@ export default function EnrollSidebar({ course, user }) {
     // No subscription
     if (!user) {
       return (
-        <Link href="/login" className="btn btn-navy btn-block btn-lg" style={{ marginBottom: '0.75rem' }}>
+        <Link href={`/login?redirect=${encodeURIComponent(`/courses/${id}`)}`} className="btn btn-navy btn-block btn-lg" style={{ marginBottom: '0.75rem' }}>
           লগ ইন করে শুরু করুন
         </Link>
       );
