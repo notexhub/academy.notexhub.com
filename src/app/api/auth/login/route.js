@@ -3,7 +3,6 @@ import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 import bcrypt from 'bcryptjs';
 import { signToken } from '@/lib/jwt';
-import { cookies } from 'next/headers';
 
 export async function POST(request) {
   try {
@@ -18,8 +17,8 @@ export async function POST(request) {
 
     const token = await signToken({ userId: user._id.toString(), role: user.role });
 
-    return NextResponse.json({ 
-      message: 'Logged in successfully', 
+    const response = NextResponse.json({
+      message: 'Logged in successfully',
       role: user.role,
       token,
       user: {
@@ -34,6 +33,17 @@ export async function POST(request) {
         }
       }
     }, { status: 200 });
+
+    // Set cookie for server-side auth (dashboard/admin pages)
+    response.cookies.set('notex_session', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+      path: '/',
+    });
+
+    return response;
   } catch (err) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
