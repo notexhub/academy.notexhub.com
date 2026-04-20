@@ -188,10 +188,19 @@ export default function DashboardClient({ user, courses, certificates, subscript
               );
             })}
             <div className="h-px bg-white/5 my-2 mx-4" />
-            <Link href="/api/auth/logout" className="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl text-[#ef4444] hover:bg-white/5 transition-colors group outline-none">
+            <div className="h-px bg-white/5 my-2 mx-4" />
+            <button 
+              onClick={() => {
+                fetch('/api/auth/logout', { method: 'POST' }).finally(() => {
+                  if (typeof window !== 'undefined') localStorage.removeItem('notex_token');
+                  window.location.href = '/';
+                });
+              }} 
+              className="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl text-[#ef4444] hover:bg-white/5 transition-colors group outline-none text-left"
+            >
               <LogOut size={18} className="group-hover:translate-x-1 transition-transform" />
               <span className="text-sm font-bold tracking-wide">লগ আউট</span>
-            </Link>
+            </button>
           </nav>
         </div>
       </aside>
