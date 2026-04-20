@@ -5,9 +5,17 @@ import Enrollment from '@/models/Enrollment';
 import { verifyToken } from '@/lib/jwt';
 import { cookies } from 'next/headers';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req) {
   try {
-    const token = cookies().get('notex_session')?.value;
+    const authHeader = req.headers.get('Authorization');
+    let token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
+    
+    if (!token || token === 'null' || token === 'undefined') {
+      token = cookies().get('notex_session')?.value;
+    }
+
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     const decoded = await verifyToken(token);
     if (!decoded) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -38,7 +46,13 @@ export async function POST(req) {
 
 export async function GET(req) {
   try {
-    const token = cookies().get('notex_session')?.value;
+    const authHeader = req.headers.get('Authorization');
+    let token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
+    
+    if (!token || token === 'null' || token === 'undefined') {
+      token = cookies().get('notex_session')?.value;
+    }
+
     if (!token) return NextResponse.json({ enrolled: false });
     const decoded = await verifyToken(token).catch(() => null);
     if (!decoded) return NextResponse.json({ enrolled: false });
