@@ -16,13 +16,7 @@ export async function POST(request) {
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
 
-    response.cookies.set('notex_session', token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 30, // 30 days
-      path: '/',
-    });
+    const token = await signToken({ userId: user._id.toString(), role: user.role });
 
     return NextResponse.json({ 
       message: 'Logged in successfully', 
