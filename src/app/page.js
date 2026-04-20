@@ -42,20 +42,33 @@ const whyItems = [
 ];
 
 export default async function Home() {
-  await dbConnect();
-  const [rawCourses, rawReviews, rawPartners, rawCats] = await Promise.all([
-    Course.find({ isActive: true }).limit(6).lean(),
-    Review.find({}).limit(4).lean(),
-    Partner.find({}).limit(8).lean(),
-    Category.find({ isActive: true }).limit(6).lean(),
-  ]);
-
-  const courses = JSON.parse(JSON.stringify(rawCourses));
-  const reviews = JSON.parse(JSON.stringify(rawReviews));
-  const partners = JSON.parse(JSON.stringify(rawPartners));
-  const categories = rawCats.length > 0 ? JSON.parse(JSON.stringify(rawCats)) : FALLBACK_CATS;
+  let courses = [];
+  let reviews = [];
+  let partners = [];
+  let categories = FALLBACK_CATS;
   const fallbackPartners = ['Pathao', 'bKash', 'Grameenphone', 'Robi', 'Daraz', 'Shajgoj', 'Chaldal', 'Shohoz'];
-  const partnerNames = partners.length > 0 ? partners.map(p => p.companyName) : fallbackPartners;
+  let partnerNames = fallbackPartners;
+
+  try {
+    await dbConnect();
+    const [rawCourses, rawReviews, rawPartners, rawCats] = await Promise.all([
+      Course.find({ isActive: true }).limit(6).lean(),
+      Review.find({}).limit(4).lean(),
+      Partner.find({}).limit(8).lean(),
+      Category.find({ isActive: true }).limit(6).lean(),
+    ]);
+
+    courses = JSON.parse(JSON.stringify(rawCourses || []));
+    reviews = JSON.parse(JSON.stringify(rawReviews || []));
+    partners = JSON.parse(JSON.stringify(rawPartners || []));
+    categories = (rawCats && rawCats.length > 0) ? JSON.parse(JSON.stringify(rawCats)) : FALLBACK_CATS;
+    
+    if (partners.length > 0) {
+      partnerNames = partners.map(p => p.companyName);
+    }
+  } catch (error) {
+    console.error("Database connection error in Home page:", error);
+  }
 
   return (
     <main style={{ background: '#ffffff' }}>

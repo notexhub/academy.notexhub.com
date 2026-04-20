@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
-  BookOpen, Download, Award, Infinity, CheckCircle,
+  BookOpen, Download, Award, Infinity as InfinityIcon, CheckCircle,
   TrendingUp, Users, Star, ArrowRight, Code2, Palette, BarChart2, Globe
 } from 'lucide-react';
 
@@ -29,7 +29,7 @@ export default function Hero() {
   ];
 
   const features = [
-    { icon: Infinity, text: 'আনলিমিটেড কোর্স' },
+    { icon: InfinityIcon, text: 'আনলিমিটেড কোর্স' },
     { icon: Download, text: 'কন্টেন্ট ডাউনলোড' },
     { icon: Award, text: 'অফিশিয়াল সার্টিফিকেট' },
     { icon: CheckCircle, text: 'একটি সাবস্ক্রিপশনে সব' },
@@ -125,7 +125,7 @@ export default function Hero() {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
                 <p style={{ color: '#64748b', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>সাবস্ক্রাইব করলেই পাবেন</p>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(204,255,0,0.15)', color: '#CCFF00', fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 20 }}>
-                  <Infinity size={11} /> সব কোর্স
+                  <InfinityIcon size={11} /> সব কোর্স
                 </span>
               </div>
 
@@ -149,7 +149,7 @@ export default function Hero() {
               ))}
 
               <div style={{ marginTop: '1rem', background: 'linear-gradient(135deg, rgba(204,255,0,0.08), rgba(204,255,0,0.03))', border: '1px solid rgba(204,255,0,0.15)', borderRadius: 12, padding: '0.85rem 1rem', display: 'flex', alignItems: 'center', gap: 10 }}>
-                <Infinity size={22} style={{ color: '#CCFF00', flexShrink: 0 }} />
+                <InfinityIcon size={22} style={{ color: '#CCFF00', flexShrink: 0 }} />
                 <div>
                   <p style={{ color: 'white', fontSize: 13, fontWeight: 700 }}>১টি সাবস্ক্রিপশনে ২০০+ কোর্স এক্সেস!</p>
                   <p style={{ color: '#CCFF00', fontSize: 11, marginTop: 2 }}>ডাউনলোড করুন · সার্টিফিকেট নিন</p>

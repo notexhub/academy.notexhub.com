@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Loader2, CheckCircle, BookOpen, Infinity, Smartphone, Trophy, MessageCircle, GraduationCap, Share2, Send, Globe } from 'lucide-react';
+import { Loader2, CheckCircle, BookOpen, Infinity as InfinityIcon, Smartphone, Trophy, MessageCircle, GraduationCap, Share2, Send, Globe } from 'lucide-react';
 
 export default function EnrollSidebar({ course, user }) {
   const id = String(course._id);
@@ -45,7 +45,7 @@ export default function EnrollSidebar({ course, user }) {
 
   const features = [
     { icon: BookOpen, text: `${course.modules?.length || 0} টি ভিডিও লেকচার` },
-    { icon: Infinity, text: 'লাইফটাইম এক্সেস' },
+    { icon: InfinityIcon, text: 'লাইফটাইম এক্সেস' },
     { icon: Smartphone, text: 'মোবাইল ও ডেস্কটপে দেখুন' },
     { icon: Trophy, text: 'কোর্স কমপ্লিশন সার্টিফিকেট' },
     { icon: MessageCircle, text: 'ইন্সট্রাক্টর সাপোর্ট' },
