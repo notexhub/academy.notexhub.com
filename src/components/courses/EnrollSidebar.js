@@ -38,12 +38,16 @@ export default function EnrollSidebar({ course, user: serverUser }) {
 
   const handleEnroll = async () => {
     if (!user) { window.location.href = `/login?redirect=${encodeURIComponent(`/courses/${id}`)}`; return; }
-    setEnrolling(true);
-    setStatusMsg('এনরোলমেন্ট প্রসেস হচ্ছে...');
-    try {
-      const headers = { 'Content-Type': 'application/json' };
-      if (reduxUser?.token) headers['Authorization'] = `Bearer ${reduxUser.token}`;
+    const headers = { 'Content-Type': 'application/json' };
+    if (reduxUser?.token) headers['Authorization'] = `Bearer ${reduxUser.token}`;
 
+    console.log('[Enroll] Starting enrollment process...', { 
+      hasToken: !!reduxUser?.token, 
+      tokenPrefix: reduxUser?.token?.substring(0, 10),
+      hasUser: !!user 
+    });
+
+    try {
       const res = await fetch('/api/user/enroll', {
         method: 'POST',
         headers,
@@ -51,17 +55,20 @@ export default function EnrollSidebar({ course, user: serverUser }) {
         body: JSON.stringify({ courseId: id }),
       });
       const data = await res.json();
-      if (data.success) {
+      if (res.ok) {
         setStatusMsg('অভিনন্দন! এনরোলমেন্ট সফল হয়েছে।');
         setEnrolled(true);
         setTimeout(() => {
           router.push(`/learn/${id}`);
         }, 1500);
       } else {
-        setStatusMsg(data.error || 'এনরোল করতে সমস্যা হয়েছে।');
+        const errorDetail = data.reason ? ` (${data.reason})` : '';
+        setStatusMsg(`${data.error || 'এনরোল করতে সমস্যা হয়েছে'}${errorDetail}`);
+        console.error('[Enroll] Failed:', data);
       }
-    } catch {
+    } catch (err) {
       setStatusMsg('নেটওয়ার্ক সমস্যা। আবার চেষ্টা করুন।');
+      console.error('[Enroll] Network Error:', err);
     }
     setEnrolling(false);
   };

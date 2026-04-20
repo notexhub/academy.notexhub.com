@@ -26,7 +26,8 @@ export default function Navbar() {
         .then(r => r.json())
         .then(d => {
           if (d.authenticated && d.user) {
-            dispatch(loginSuccess({ user: d.user, token: null }));
+            // Restore session including token if returned
+            dispatch(loginSuccess({ user: d.user, token: d.token || null }));
           }
           setSessionLoading(false);
         })

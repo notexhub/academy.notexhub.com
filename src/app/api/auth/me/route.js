@@ -7,13 +7,17 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req) {
   try {
-    const payload = await getAuthUser(req);
-    if (!payload || !payload.userId) {
-      return NextResponse.json({ authenticated: false, reason: 'no_session' }, { status: 401 });
+    const auth = await getAuthUser(req);
+    if (!auth.user) {
+      return NextResponse.json({ 
+        authenticated: false, 
+        reason: auth.reason,
+        source: auth.source 
+      }, { status: 401 });
     }
  
     await dbConnect();
-    const user = await User.findById(payload.userId).select('name email role').lean();
+    const user = await User.findById(auth.user.userId).select('name email role').lean();
  
     if (!user) {
       return NextResponse.json({ authenticated: false, reason: 'user_not_found' }, { status: 401 });
@@ -21,6 +25,7 @@ export async function GET(req) {
 
     return NextResponse.json({
       authenticated: true,
+      token: auth.token, // Return token so Redux can re-hydrate properly
       user: {
         id: user._id,
         name: user.name,
@@ -34,6 +39,6 @@ export async function GET(req) {
       }
     });
   } catch (error) {
-    return NextResponse.json({ authenticated: false }, { status: 401 });
+    return NextResponse.json({ authenticated: false, reason: 'unhandled_error' }, { status: 401 });
   }
 }

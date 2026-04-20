@@ -8,8 +8,14 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req) {
   try {
-    const decoded = await getAuthUser(req);
-    if (!decoded) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const auth = await getAuthUser(req);
+    if (!auth.user) {
+      return NextResponse.json({ 
+        error: 'Unauthorized', 
+        reason: auth.reason,
+        source: auth.source
+      }, { status: 401 });
+    }
 
     const { courseId } = await req.json();
     if (!courseId) return NextResponse.json({ error: 'courseId required' }, { status: 400 });
@@ -22,8 +28,8 @@ export async function POST(req) {
 
     // Upsert enrollment (idempotent)
     await Enrollment.findOneAndUpdate(
-      { userId: decoded.userId, courseId },
-      { userId: decoded.userId, courseId, type },
+      { userId: auth.user.userId, courseId },
+      { userId: auth.user.userId, courseId, type },
       { upsert: true, new: true }
     );
 
@@ -37,15 +43,15 @@ export async function POST(req) {
 
 export async function GET(req) {
   try {
-    const decoded = await getAuthUser(req);
-    if (!decoded) return NextResponse.json({ enrolled: false });
+    const auth = await getAuthUser(req);
+    if (!auth.user) return NextResponse.json({ enrolled: false, reason: auth.reason });
 
     const { searchParams } = new URL(req.url);
     const courseId = searchParams.get('courseId');
     if (!courseId) return NextResponse.json({ enrolled: false });
 
     await dbConnect();
-    const exists = await Enrollment.findOne({ userId: decoded.userId, courseId }).lean();
+    const exists = await Enrollment.findOne({ userId: auth.user.userId, courseId }).lean();
     return NextResponse.json({ enrolled: !!exists });
   } catch {
     return NextResponse.json({ enrolled: false });
