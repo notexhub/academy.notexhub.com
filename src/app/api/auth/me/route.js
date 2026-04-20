@@ -1,21 +1,15 @@
 import { NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/jwt';
-import { cookies } from 'next/headers';
+import { getAuthUser } from '@/lib/auth';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(req) {
   try {
-    const token = cookies().get('notex_session')?.value;
-    if (!token) {
-      return NextResponse.json({ authenticated: false, reason: 'no_cookie' }, { status: 401 });
-    }
- 
-    const payload = await verifyToken(token);
+    const payload = await getAuthUser(req);
     if (!payload || !payload.userId) {
-      return NextResponse.json({ authenticated: false, reason: 'invalid_token' }, { status: 401 });
+      return NextResponse.json({ authenticated: false, reason: 'no_session' }, { status: 401 });
     }
  
     await dbConnect();

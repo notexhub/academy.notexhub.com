@@ -2,22 +2,13 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Course from '@/models/Course';
 import Enrollment from '@/models/Enrollment';
-import { verifyToken } from '@/lib/jwt';
-import { cookies } from 'next/headers';
+import { getAuthUser } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req) {
   try {
-    const authHeader = req.headers.get('Authorization');
-    let token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
-    
-    if (!token || token === 'null' || token === 'undefined') {
-      token = cookies().get('notex_session')?.value;
-    }
-
-    if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    const decoded = await verifyToken(token);
+    const decoded = await getAuthUser(req);
     if (!decoded) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { courseId } = await req.json();
@@ -46,15 +37,7 @@ export async function POST(req) {
 
 export async function GET(req) {
   try {
-    const authHeader = req.headers.get('Authorization');
-    let token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
-    
-    if (!token || token === 'null' || token === 'undefined') {
-      token = cookies().get('notex_session')?.value;
-    }
-
-    if (!token) return NextResponse.json({ enrolled: false });
-    const decoded = await verifyToken(token).catch(() => null);
+    const decoded = await getAuthUser(req);
     if (!decoded) return NextResponse.json({ enrolled: false });
 
     const { searchParams } = new URL(req.url);
