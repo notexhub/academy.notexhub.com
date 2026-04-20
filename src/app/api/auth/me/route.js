@@ -4,6 +4,8 @@ import { cookies } from 'next/headers';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const token = cookies().get('auth_token')?.value;

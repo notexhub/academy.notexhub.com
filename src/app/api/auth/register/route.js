@@ -3,6 +3,7 @@ import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 import bcrypt from 'bcryptjs';
 import { signToken } from '@/lib/jwt';
+import { cookies } from 'next/headers';
 
 export async function POST(request) {
   try {
@@ -20,9 +21,8 @@ export async function POST(request) {
     
     // Auto-login
     const token = await signToken({ userId: user._id.toString(), role: user.role });
-    const response = NextResponse.json({ message: 'User created successfully', role }, { status: 201 });
     
-    response.cookies.set('auth_token', token, {
+    cookies().set('auth_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -30,7 +30,7 @@ export async function POST(request) {
       path: '/',
     });
 
-    return response;
+    return NextResponse.json({ message: 'User created successfully', role }, { status: 201 });
   } catch (err) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }

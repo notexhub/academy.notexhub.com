@@ -16,9 +16,8 @@ export async function POST(request) {
     if (!isValid) return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
 
     const token = await signToken({ userId: user._id.toString(), role: user.role });
-    const response = NextResponse.json({ message: 'Logged in successfully', role: user.role }, { status: 200 });
     
-    response.cookies.set('auth_token', token, {
+    cookies().set('auth_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -26,7 +25,7 @@ export async function POST(request) {
       path: '/',
     });
 
-    return response;
+    return NextResponse.json({ message: 'Logged in successfully', role: user.role }, { status: 200 });
   } catch (err) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
