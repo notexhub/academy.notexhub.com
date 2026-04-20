@@ -21,8 +21,9 @@ export async function POST(request) {
     
     // Auto-login
     const token = await signToken({ userId: user._id.toString(), role: user.role });
+    const response = NextResponse.json({ message: 'User created successfully', role: user.role }, { status: 201 });
     
-    cookies().set('auth_token', token, {
+    response.cookies.set('auth_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -30,7 +31,7 @@ export async function POST(request) {
       path: '/',
     });
 
-    return NextResponse.json({ message: 'User created successfully', role }, { status: 201 });
+    return response;
   } catch (err) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }

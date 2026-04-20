@@ -2,12 +2,14 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
 export async function GET(request) {
-  cookies().delete('auth_token');
   const url = new URL('/', request.url);
-  return NextResponse.redirect(url);
+  const response = NextResponse.redirect(url);
+  response.cookies.set('auth_token', '', { maxAge: 0, path: '/' });
+  return response;
 }
 
 export async function POST() {
-  cookies().delete('auth_token');
-  return NextResponse.json({ message: 'Logged out successfully' }, { status: 200 });
+  const response = NextResponse.json({ message: 'Logged out successfully' }, { status: 200 });
+  response.cookies.set('auth_token', '', { maxAge: 0, path: '/' });
+  return response;
 }
