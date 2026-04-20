@@ -4,12 +4,15 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle2 } from 'lucide-react';
 import { Suspense } from 'react';
+import { loginSuccess } from '@/redux/slices/authSlice';
+import { useDispatch } from 'react-redux';
 
 function LoginContent() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const dispatch = useDispatch();
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect');
 
@@ -20,6 +23,7 @@ function LoginContent() {
       const res = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
       const data = await res.json();
       if (res.ok) {
+        dispatch(loginSuccess({ user: data.user, token: data.token }));
         if (redirect) window.location.href = redirect;
         else window.location.href = data.role === 'admin' ? '/admin' : '/dashboard';
       }

@@ -1,14 +1,13 @@
-'use client';
-import { useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { Suspense } from 'react';
+import { useDispatch } from 'react-redux';
+import { loginSuccess } from '@/redux/slices/authSlice';
 
 function RegisterContent() {
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const dispatch = useDispatch();
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect');
 
@@ -19,6 +18,7 @@ function RegisterContent() {
       const res = await fetch('/api/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
       const data = await res.json();
       if (res.ok) {
+        dispatch(loginSuccess({ user: data.user, token: data.token }));
         if (redirect) window.location.href = redirect;
         else window.location.href = data.role === 'admin' ? '/admin' : '/dashboard';
       }

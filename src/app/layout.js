@@ -19,10 +19,16 @@ export const metadata = {
 
 export const viewport = { width: 'device-width', initialScale: 1 };
 
+import ReduxProvider from '@/redux/ReduxProvider';
+
 export default function RootLayout({ children }) {
   return (
     <html lang="bn" className={hind.variable}>
-      <body className={hind.className}>{children}</body>
+      <body className={hind.className}>
+        <ReduxProvider>
+          {children}
+        </ReduxProvider>
+      </body>
     </html>
   );
 }

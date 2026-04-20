@@ -4,24 +4,20 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { LayoutDashboard, LogOut, Search } from 'lucide-react';
 
+import { useSelector, useDispatch } from 'react-redux';
+import { logout } from '@/redux/slices/authSlice';
+
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [q, setQ] = useState('');
   const pathname = usePathname();
   const router = useRouter();
-  const [authLoading, setAuthLoading] = useState(true);
-  const [user, setUser] = useState(null);
+  const dispatch = useDispatch();
+  
+  const { user, isAuthenticated, loading: authLoading } = useSelector((state) => state.auth);
   const [logoData, setLogoData] = useState(null);
 
   useEffect(() => {
-    fetch('/api/auth/me')
-      .then(r => r.json())
-      .then(d => {
-        if (d.authenticated && d.user) setUser(d.user);
-        setAuthLoading(false);
-      })
-      .catch(() => setAuthLoading(false));
-
     fetch('/api/settings')
       .then(r => r.json())
       .then(d => {
@@ -37,6 +33,17 @@ export default function Navbar() {
     window.addEventListener('scroll', fn);
     return () => window.removeEventListener('scroll', fn);
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      dispatch(logout());
+      window.location.href = '/';
+    } catch (err) {
+      dispatch(logout());
+      window.location.href = '/';
+    }
+  };
 
   const navLinks = [
     { href: '/courses', label: 'কোর্সমূহ' },
@@ -100,7 +107,7 @@ export default function Navbar() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexShrink: 0 }}>
           {authLoading ? (
              <div style={{ width: 150, height: 38, background: 'var(--gray-200)', borderRadius: 'var(--radius-full)', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
-          ) : user ? (
+          ) : isAuthenticated && user ? (
             <div className="flex items-center gap-2">
               <div className="hidden md:flex items-center gap-2 pr-3 pl-1 py-1 bg-[#f8fafc] rounded-full border border-[#f1f5f9] mr-1">
                  <div className="w-7 h-7 rounded-full bg-[#0f172a] text-[#CCFF00] flex items-center justify-center font-black text-xs">
@@ -112,9 +119,12 @@ export default function Navbar() {
               <Link href={user.role === 'admin' ? '/admin' : '/dashboard'} className="flex items-center gap-1.5 px-4 py-2 bg-[#0f172a] text-[#CCFF00] rounded-full text-[13px] font-bold hover:bg-[#1e293b] transition-colors shadow-sm whitespace-nowrap">
                 <LayoutDashboard size={15} /> ড্যাশবোর্ড
               </Link>
-              <Link href="/api/auth/logout" className="flex items-center gap-1.5 px-4 py-2 bg-white text-[#ef4444] border border-[#fee2e2] rounded-full text-[13px] font-bold hover:bg-[#fef2f2] transition-colors shadow-sm whitespace-nowrap">
+              <button 
+                onClick={handleLogout}
+                className="flex items-center gap-1.5 px-4 py-2 bg-white text-[#ef4444] border border-[#fee2e2] rounded-full text-[13px] font-bold hover:bg-[#fef2f2] transition-colors shadow-sm whitespace-nowrap"
+              >
                 <LogOut size={15} /> লগ আউট
-              </Link>
+              </button>
             </div>
           ) : (
             <>
@@ -127,3 +137,4 @@ export default function Navbar() {
     </header>
   );
 }
+

@@ -16,9 +16,6 @@ export async function POST(request) {
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
 
-    const token = await signToken({ userId: user._id.toString(), role: user.role });
-    const response = NextResponse.json({ message: 'Logged in successfully', role: user.role }, { status: 200 });
-    
     response.cookies.set('notex_session', token, {
       httpOnly: true,
       secure: true,
@@ -27,7 +24,22 @@ export async function POST(request) {
       path: '/',
     });
 
-    return response;
+    return NextResponse.json({ 
+      message: 'Logged in successfully', 
+      role: user.role,
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        subscription: {
+          plan: user.subscription?.plan || 'none',
+          active: user.subscription?.expiresAt ? new Date(user.subscription.expiresAt) > new Date() : false,
+          expiresAt: user.subscription?.expiresAt
+        }
+      }
+    }, { status: 200 });
   } catch (err) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }

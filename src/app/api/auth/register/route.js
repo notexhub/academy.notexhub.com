@@ -21,9 +21,7 @@ export async function POST(request) {
     
     // Auto-login
     const token = await signToken({ userId: user._id.toString(), role: user.role });
-    const response = NextResponse.json({ message: 'User created successfully', role: user.role }, { status: 201 });
-    
-    response.cookies.set('notex_session', token, {
+    cookies().set('notex_session', token, {
       httpOnly: true,
       secure: true,
       sameSite: 'lax',
@@ -31,7 +29,22 @@ export async function POST(request) {
       path: '/',
     });
 
-    return response;
+    return NextResponse.json({ 
+      message: 'User created successfully', 
+      role: user.role,
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        subscription: {
+          plan: 'none',
+          active: false,
+          expiresAt: null
+        }
+      }
+    }, { status: 201 });
   } catch (err) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }

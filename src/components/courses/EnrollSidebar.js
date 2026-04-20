@@ -2,9 +2,14 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useSelector } from 'react-redux';
 import { Loader2, CheckCircle, BookOpen, Infinity as InfinityIcon, Smartphone, Trophy, MessageCircle, GraduationCap, Share2, Send, Globe } from 'lucide-react';
 
-export default function EnrollSidebar({ course, user }) {
+export default function EnrollSidebar({ course, user: serverUser }) {
+  const { user: reduxUser, isAuthenticated } = useSelector(state => state.auth);
+  // Prioritize Redux state (client-side) over server-passed props
+  const user = reduxUser || serverUser;
+  
   const id = String(course._id);
   const isFree = course.isFree;
   const hasSub = user?.subscription?.plan && user.subscription.plan !== 'none' && new Date(user.subscription.expiresAt) > new Date();
@@ -17,19 +22,26 @@ export default function EnrollSidebar({ course, user }) {
 
   useEffect(() => {
     if (!user) { setCheckingEnroll(false); return; }
-    fetch(`/api/user/enroll?courseId=${id}`)
+    fetch(`/api/user/enroll?courseId=${id}`, {
+      headers: {
+        'Authorization': `Bearer ${reduxUser?.token || ''}`
+      }
+    })
       .then(r => r.json())
       .then(d => { setEnrolled(d.enrolled); setCheckingEnroll(false); })
       .catch(() => setCheckingEnroll(false));
-  }, [id, user]);
+  }, [id, user, reduxUser]);
 
   const handleEnroll = async () => {
-    if (!user) { router.push(`/login?redirect=${encodeURIComponent(`/courses/${id}`)}`); return; }
+    if (!user) { window.location.href = `/login?redirect=${encodeURIComponent(`/courses/${id}`)}`; return; }
     setEnrolling(true);
     try {
       const res = await fetch('/api/user/enroll', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${reduxUser?.token || ''}`
+        },
         body: JSON.stringify({ courseId: id }),
       });
       const data = await res.json();
